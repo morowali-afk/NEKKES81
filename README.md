@@ -14,7 +14,9 @@ Aplikasi GUI untuk Kali Linux yang menggabungkan workflow pentest berizin:
 10. Subfinder → enumerasi subdomain pasif
 11. WhatWeb → fingerprint teknologi web
 12. Nuclei → safe/rate-limited template scan
-13. Report Markdown + HTML + PDF profesional dengan ringkasan evidence dan prioritas validasi
+13. Analyzer Engine → membuat `findings.json` dengan severity, evidence, impact, rekomendasi, dan status validasi
+14. Tombol Copy Ringkasan/Temuan/Path Report untuk menyalin hasil scan cepat
+15. Report Markdown + HTML + PDF profesional dengan ringkasan evidence dan prioritas validasi
 
 ## Batasan Aman
 
@@ -72,7 +74,9 @@ LaiHakerAI Pentest Assistant
 11. Jalankan Subfinder/theHarvester untuk OSINT domain berizin.
 12. Jalankan WhatWeb dan Nuclei Safe untuk fingerprint dan validasi ringan.
 13. Jalankan HTTP Probe untuk rangkuman status, header, cookie, robots.txt, dan sitemap.xml.
-14. Klik Generate Report/PDF.
+14. Klik Analyze Findings untuk membuat `findings.json`.
+15. Pakai Copy Ringkasan, Copy Temuan, atau Copy Path Report jika ingin mengirim hasil scan cepat.
+16. Klik Generate Report/PDF.
 
 ## Workflow Otomatis
 
@@ -84,7 +88,33 @@ Tombol **Run Authorized Workflow** akan menjalankan langkah yang relevan secara 
 - Subfinder jika domain valid tersedia
 - Nuclei Safe dan theHarvester pada mode Deep Authorized
 - Metasploit search-only berdasarkan service hasil Nmap
+- Analyzer Engine membuat `findings.json` berisi risk scoring, evidence, impact, rekomendasi, dan validation status
 - Generate report akhir dalam Markdown, HTML, dan PDF profesional jika Chromium tersedia
+
+## Analyzer & Copy Hasil Scan
+
+Tombol **Analyze Findings** membaca output scanner yang tersedia lalu membuat:
+
+```text
+findings.json
+```
+
+Isi finding meliputi:
+
+- title
+- severity
+- category
+- affected_asset
+- evidence
+- impact
+- recommendation
+- validation_status
+
+Tombol copy:
+
+- **Copy Ringkasan**: menyalin ringkasan severity dan prioritas temuan
+- **Copy Temuan**: menyalin detail teknis semua finding
+- **Copy Path Report**: menyalin path PDF/HTML/Markdown/output terbaru
 
 ## Catatan Legal
 
