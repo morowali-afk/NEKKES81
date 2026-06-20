@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*.log
+*.tmp
+
+.venv/
+venv/
+
+pentest_reports/
+reports/
+outgoing_reports/
+*.pdf
+*.html
+*.zip
+
+kali_pentest_backup.py
