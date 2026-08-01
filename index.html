@@ -482,6 +482,12 @@
                                                 </label>
                                             </div>
                                         </div>
+                                        <div class="sm:col-span-2 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                            <label for="buktiFile" class="block text-sm font-medium text-gray-700 mb-1">Upload Foto/Scan KK (opsional)</label>
+                                            <input type="file" id="buktiFile" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf"
+                                                class="w-full text-sm text-gray-600 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-50 file:text-primary file:font-medium hover:file:bg-blue-100 cursor-pointer">
+                                            <p class="text-xs text-gray-400 mt-1">JPG/PNG/PDF maks. 2 MB. Mempercepat verifikasi oleh panitia.</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -545,11 +551,13 @@
                         <i class="fa-solid fa-lock text-2xl"></i>
                     </div>
                     <h2 class="text-2xl font-bold text-secondary mb-2">Login Administrator</h2>
-                    <p class="text-sm text-gray-500 mb-6">Masukkan PIN keamanan untuk mengakses panel admin.</p>
+                    <p class="text-sm text-gray-500 mb-6">Masuk dengan akun administrator (email & kata sandi dari database online).</p>
 
                     <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
-                        <input type="password" id="adminPin" required placeholder="PIN" inputmode="numeric" autocomplete="off"
-                            class="w-full px-4 py-3 text-center tracking-widest text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors mb-4">
+                        <input type="email" id="adminEmail" required placeholder="Email admin" autocomplete="username"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors mb-3">
+                        <input type="password" id="adminPassword" required placeholder="Kata sandi" autocomplete="current-password"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors mb-4">
                         <button type="submit" class="w-full bg-secondary hover:bg-gray-800 text-white font-bold py-3 px-4 rounded-lg shadow transition-all">
                             Masuk
                         </button>
@@ -731,27 +739,23 @@
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <!-- Keamanan -->
                             <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
-                                <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fa-solid fa-key text-primary mr-2"></i>Ubah PIN Admin</h3>
-                                <form id="changePinForm" onsubmit="handleChangePin(event)">
+                                <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fa-solid fa-key text-primary mr-2"></i>Ubah Kata Sandi Admin</h3>
+                                <form id="changePasswordForm" onsubmit="handleChangePassword(event)">
                                     <div class="grid grid-cols-1 gap-4 mb-4">
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">PIN Saat Ini *</label>
-                                            <input type="password" id="currentPin" required inputmode="numeric" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary outline-none">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi Baru * (min. 8 karakter)</label>
+                                            <input type="password" id="newPassword" required minlength="8" autocomplete="new-password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary outline-none">
                                         </div>
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">PIN Baru * (4–10 digit)</label>
-                                            <input type="password" id="newPin" required inputmode="numeric" minlength="4" maxlength="10" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary outline-none">
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Ulangi PIN Baru *</label>
-                                            <input type="password" id="confirmPin" required inputmode="numeric" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary outline-none">
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Ulangi Kata Sandi Baru *</label>
+                                            <input type="password" id="confirmPassword" required autocomplete="new-password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary outline-none">
                                         </div>
                                     </div>
                                     <button type="submit" class="bg-secondary hover:bg-gray-800 text-white font-medium py-2 px-6 rounded-lg transition-colors">
-                                        Simpan PIN Baru
+                                        Simpan Kata Sandi
                                     </button>
                                 </form>
-                                <p class="text-xs text-gray-400 mt-4"><i class="fa-solid fa-circle-info mr-1"></i>PIN disimpan secara lokal di perangkat ini. Ganti PIN default (12345) setelah login pertama.</p>
+                                <p class="text-xs text-gray-400 mt-4"><i class="fa-solid fa-circle-info mr-1"></i>Kata sandi tersimpan di database online (Supabase Auth) dan berlaku di semua perangkat.</p>
                             </div>
 
                             <!-- Kontak & Pengaturan Pendaftaran -->
@@ -774,6 +778,20 @@
                                             Simpan Kontak
                                         </button>
                                     </form>
+                                </div>
+
+                                <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                                    <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fa-solid fa-bell text-primary mr-2"></i>Notifikasi Pendaftar Baru (Browser)</h3>
+                                    <p class="text-sm text-gray-500 mb-4">Aktifkan notifikasi browser di perangkat ini — Anda akan mendapat pemberitahuan setiap kali ada pendaftar baru masuk ke database online.</p>
+                                    <div id="pushStatus" class="text-xs text-gray-400 mb-3">Memeriksa status notifikasi...</div>
+                                    <div class="flex flex-col sm:flex-row gap-3">
+                                        <button onclick="enablePush()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                            <i class="fa-solid fa-bell"></i> Aktifkan Notifikasi
+                                        </button>
+                                        <button onclick="disablePush()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-sm font-medium px-5 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                            <i class="fa-solid fa-bell-slash"></i> Nonaktifkan
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
@@ -887,6 +905,7 @@
         const sbClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
         const SUPABASE_ENABLED = !!sbClient;
         const SUPABASE_TABLE = 'pendaftar';
+        const VAPID_PUBLIC_KEY = 'BNzky_AMP0eGulCxbHxkdfVOhaWtneJM7mmoAfe9mMgxhj_uZbIzCOBw_BoBxXblwB7qg13k5YUXR45r-8Wvs8s';
 
         async function dbInsertRegistrant(data) {
             if (!sbClient) return { ok: false, error: 'Supabase tidak tersedia' };
@@ -900,11 +919,19 @@
                 district: data.district || null,
                 origin_church: data.originChurch || null,
                 registration_type: data.registrationType || 'Individu',
-                status: 'Baru'
+                bukti_path: data.buktiPath || null
             };
-            const { data: inserted, error } = await sbClient.from(SUPABASE_TABLE).insert(payload).select();
-            if (error) return { ok: false, error: error.message };
-            return { ok: true, data: inserted && inserted[0] };
+            // RPC security-definer: insert + kembalikan baris (jalan untuk publik meski RLS ketat)
+            try {
+                const { data: row, error } = await sbClient.rpc('register_registrant', { p: payload });
+                if (!error && row && row.id) return { ok: true, data: row };
+                // Fallback: insert langsung tanpa SELECT (RLS memblokir RETURNING untuk anon)
+                const { error: err2 } = await sbClient.from(SUPABASE_TABLE).insert(payload);
+                if (err2) return { ok: false, error: err2.message };
+                return { ok: true, data: null };
+            } catch (e) {
+                return { ok: false, error: e.message };
+            }
         }
 
         async function dbFetchRegistrants() {
@@ -942,6 +969,7 @@
                 originChurch: row.origin_church || '-',
                 registrationType: row.registration_type || 'Individu',
                 status: row.status || 'Baru',
+                buktiPath: row.bukti_path || null,
                 timestamp: row.created_at || new Date().toISOString(),
                 fromDb: true
             };
@@ -991,75 +1019,7 @@
                 image: ""
             }
         ]);
-        let adminPinRecord = loadJSON(STORAGE_KEYS.pin, null); // {salt, hash} atau PIN plaintext lama (migrasi otomatis)
-        let isAdminLoggedIn = (() => {
-            const s = loadJSON(STORAGE_KEYS.session, false);
-            if (s === true) return true; // sesi lama (boolean) — tetap valid
-            if (s && s.loggedIn && s.at) {
-                // Sesi admin kedaluwarsa setelah 12 jam
-                if (Date.now() - s.at > 12 * 60 * 60 * 1000) {
-                    saveJSON(STORAGE_KEYS.session, false);
-                    return false;
-                }
-                return true;
-            }
-            return false;
-        })();
-        let pinLock = loadJSON('gkmr_forum_pin_lock_v1', { fails: 0, lockedUntil: 0 });
-
-        // ========== KEAMANAN PIN (SHA-256 + salt, anti brute-force) ==========
-        function randomSalt(len) {
-            const arr = new Uint8Array(len);
-            crypto.getRandomValues(arr);
-            return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-        async function hashPin(pin, salt) {
-            const data = new TextEncoder().encode(`${salt}::${pin}`);
-            const digest = await crypto.subtle.digest('SHA-256', data);
-            return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-        async function verifyPin(pin) {
-            if (!adminPinRecord) {
-                // Default PIN awal (12345) untuk perangkat baru — langsung migrasi ke hash saat login pertama
-                const ok = (pin === '12345');
-                if (ok) {
-                    const salt = randomSalt(16);
-                    adminPinRecord = { salt, hash: await hashPin(pin, salt) };
-                    saveJSON(STORAGE_KEYS.pin, adminPinRecord);
-                }
-                return ok;
-            }
-            // Migrasi otomatis: PIN plaintext lama → hash
-            if (typeof adminPinRecord === 'string') {
-                const ok = (pin === adminPinRecord);
-                if (ok) {
-                    const salt = randomSalt(16);
-                    adminPinRecord = { salt, hash: await hashPin(pin, salt) };
-                    saveJSON(STORAGE_KEYS.pin, adminPinRecord);
-                }
-                return ok;
-            }
-            const h = await hashPin(pin, adminPinRecord.salt);
-            return h === adminPinRecord.hash;
-        }
-        async function setPin(pin) {
-            const salt = randomSalt(16);
-            adminPinRecord = { salt, hash: await hashPin(pin, salt) };
-            saveJSON(STORAGE_KEYS.pin, adminPinRecord);
-        }
-        function pinLockRemaining() {
-            if (pinLock.lockedUntil && Date.now() < pinLock.lockedUntil) return Math.ceil((pinLock.lockedUntil - Date.now()) / 1000);
-            return 0;
-        }
-        function registerPinFail() {
-            pinLock.fails = (pinLock.fails || 0) + 1;
-            if (pinLock.fails >= 5) {
-                pinLock.lockedUntil = Date.now() + 60 * 1000; // kunci 60 detik setelah 5x salah
-                pinLock.fails = 0;
-            }
-            saveJSON('gkmr_forum_pin_lock_v1', pinLock);
-        }
-        function resetPinLock() { pinLock = { fails: 0, lockedUntil: 0 }; saveJSON('gkmr_forum_pin_lock_v1', pinLock); }
+        let isAdminLoggedIn = !!loadJSON(STORAGE_KEYS.session, false);
         let settings = loadJSON(STORAGE_KEYS.settings, {
             waNumber: '',
             email: 'info@gkmr.org',
@@ -1114,19 +1074,42 @@
             const resultEl = document.getElementById('checkResult');
             resultEl.innerHTML = '<div class="text-center py-6 text-gray-500 text-sm"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Memeriksa data...</div>';
 
-            let pool = [...registrants];
-            if (sbClient) {
-                try {
-                    const res = await dbFetchRegistrants();
-                    if (res.ok && res.data.length) {
-                        const dbRows = res.data.map(normalizeDbRow);
-                        pool = mergeDbRows(dbRows);
-                    }
-                } catch (e) { /* offline — pakai data lokal */ }
+            function renderCheckResult(p) {
+                const dateObj = new Date(p.timestamp);
+                const dateStr = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                const verified = p.status === 'Diverifikasi';
+                resultEl.innerHTML = `
+                    <div class="${verified ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'} border rounded-xl p-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-12 h-12 rounded-full ${verified ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-primary'} flex items-center justify-center text-xl font-bold">${escapeHtml((p.fullName || '?').charAt(0).toUpperCase())}</div>
+                            <div>
+                                <div class="font-bold text-gray-900 text-lg">${escapeHtml(p.fullName)}</div>
+                                <div class="text-xs text-gray-500">Terdaftar: ${dateStr} • ${escapeHtml(p.district || '-')}</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 p-3 rounded-lg ${verified ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}">
+                            <i class="fa-solid ${verified ? 'fa-circle-check' : 'fa-clock'}"></i>
+                            <span class="font-semibold text-sm">${verified ? '✓ Status: Diverifikasi — data Anda telah dikonfirmasi panitia.' : 'Status: Baru — data Anda masih menunggu verifikasi panitia.'}</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-4">Pertanyaan? Hubungi sekretariat via <a href="#" onclick="openWaSekretariat(); return false;" class="text-green-600 font-semibold">WhatsApp</a>.</p>
+                    </div>`;
             }
 
+            // Prioritas: RPC check_status di database (hanya data pemilik nomor — aman & privat)
+            if (sbClient) {
+                try {
+                    const { data: rpcData, error: rpcError } = await sbClient.rpc('check_status', { p_phone: phone });
+                    if (!rpcError && rpcData && rpcData.length) {
+                        const row = rpcData[0];
+                        renderCheckResult({ fullName: row.full_name, status: row.status, timestamp: row.registration_date, district: row.district });
+                        return;
+                    }
+                } catch (e) { /* lanjut ke fallback lokal */ }
+            }
+
+            // Fallback: cache lokal (mode offline)
             const digits = phone.replace(/[^0-9]/g, '');
-            const found = pool.filter(r => {
+            const found = registrants.filter(r => {
                 const rd = String(r.phone || '').replace(/[^0-9]/g, '');
                 return rd === digits || rd === digits.replace(/^0/, '62') || rd === digits.replace(/^0/, '+62');
             });
@@ -1141,83 +1124,174 @@
                 return;
             }
 
-            const p = found[found.length - 1]; // data terbaru
-            const dateObj = new Date(p.timestamp);
-            const dateStr = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
-            const verified = p.status === 'Diverifikasi';
-            resultEl.innerHTML = `
-                <div class="${verified ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'} border rounded-xl p-6">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-12 h-12 rounded-full ${verified ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-primary'} flex items-center justify-center text-xl font-bold">${escapeHtml((p.fullName || '?').charAt(0).toUpperCase())}</div>
-                        <div>
-                            <div class="font-bold text-gray-900 text-lg">${escapeHtml(p.fullName)}</div>
-                            <div class="text-xs text-gray-500">Terdaftar: ${dateStr} • ${escapeHtml(p.district || '-')}</div>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2 p-3 rounded-lg ${verified ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}">
-                        <i class="fa-solid ${verified ? 'fa-circle-check' : 'fa-clock'}"></i>
-                        <span class="font-semibold text-sm">${verified ? '✓ Status: Diverifikasi — data Anda telah dikonfirmasi panitia.' : 'Status: Baru — data Anda masih menunggu verifikasi panitia.'}</span>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-4">Pertanyaan? Hubungi sekretariat via <a href="#" onclick="openWaSekretariat(); return false;" class="text-green-600 font-semibold">WhatsApp</a>.</p>
-                </div>`;
+            renderCheckResult(found[found.length - 1]); // data terbaru
         }
 
-        // ========== ADMIN AUTH ==========
+        // ========== ADMIN AUTH (Supabase Auth + RLS) ==========
+        async function authRestoreSession() {
+            if (!sbClient) return false;
+            try {
+                const { data } = await sbClient.auth.getSession();
+                if (data && data.session) {
+                    isAdminLoggedIn = true;
+                    saveJSON(STORAGE_KEYS.session, true);
+                    return true;
+                }
+            } catch (e) { /* ignore */ }
+            isAdminLoggedIn = false;
+            saveJSON(STORAGE_KEYS.session, false);
+            return false;
+        }
+
+        async function refreshRegistrantsFromDb() {
+            if (!sbClient) return;
+            try {
+                const res = await dbFetchRegistrants();
+                if (res.ok && res.data.length) {
+                    registrants = mergeDbRows(res.data.map(normalizeDbRow));
+                    saveJSON(STORAGE_KEYS.registrants, registrants);
+                    updateRegistrantsTable();
+                    updateStats();
+                    renderStats();
+                    const live = document.getElementById('liveRegistrantCount');
+                    if (live) live.textContent = registrants.length;
+                }
+            } catch (e) { /* offline — tetap pakai data lokal */ }
+        }
+
         async function handleAdminLogin(event) {
             event.preventDefault();
-            const remaining = pinLockRemaining();
-            if (remaining > 0) {
-                Swal.fire({ icon: 'error', title: 'Terlalu Banyak Percobaan', text: `Panel admin terkunci. Coba lagi dalam ${remaining} detik.` });
+            const email = document.getElementById('adminEmail').value.trim();
+            const password = document.getElementById('adminPassword').value;
+            if (!sbClient) {
+                Swal.fire({ icon: 'error', title: 'Database Tidak Tersedia', text: 'Tidak dapat terhubung ke database online GKMR.' });
                 return;
             }
-            const pin = document.getElementById('adminPin').value;
-            const ok = await verifyPin(pin);
-            if (ok) {
-                isAdminLoggedIn = true;
-                saveJSON(STORAGE_KEYS.session, { loggedIn: true, at: Date.now() });
-                resetPinLock();
-                document.getElementById('adminLoginView').classList.add('hidden');
-                document.getElementById('adminDashboardView').classList.remove('hidden');
-                document.getElementById('adminPin').value = '';
-                renderAdminDashboard();
-                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Login Admin Berhasil', showConfirmButton: false, timer: 1500 });
-            } else {
-                registerPinFail();
-                const remaining2 = pinLockRemaining();
-                Swal.fire({ icon: 'error', title: 'Akses Ditolak', text: remaining2 > 0 ? `PIN salah. Panel terkunci ${remaining2} detik.` : 'PIN yang Anda masukkan salah.' });
+            const { error } = await sbClient.auth.signInWithPassword({ email, password });
+            if (error) {
+                Swal.fire({ icon: 'error', title: 'Akses Ditolak', text: 'Email atau kata sandi salah. Pastikan akun admin sudah terdaftar di database online.' });
+                return;
             }
+            isAdminLoggedIn = true;
+            saveJSON(STORAGE_KEYS.session, true);
+            document.getElementById('adminLoginView').classList.add('hidden');
+            document.getElementById('adminDashboardView').classList.remove('hidden');
+            document.getElementById('adminPassword').value = '';
+            renderAdminDashboard();
+            refreshRegistrantsFromDb();
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Login Admin Berhasil', showConfirmButton: false, timer: 1500 });
         }
 
         function handleAdminLogout() {
             isAdminLoggedIn = false;
             saveJSON(STORAGE_KEYS.session, false);
+            if (sbClient) sbClient.auth.signOut().catch(() => {});
             document.getElementById('adminLoginView').classList.remove('hidden');
             document.getElementById('adminDashboardView').classList.add('hidden');
             showSection('home');
             Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Anda telah keluar', showConfirmButton: false, timer: 1500 });
         }
 
-        async function handleChangePin(event) {
+        async function handleChangePassword(event) {
             event.preventDefault();
-            const current = document.getElementById('currentPin').value;
-            const newPin = document.getElementById('newPin').value;
-            const confirm = document.getElementById('confirmPin').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            if (newPass.length < 8) {
+                Swal.fire({ icon: 'error', title: 'Kata Sandi Terlalu Pendek', text: 'Kata sandi baru minimal 8 karakter.' });
+                return;
+            }
+            if (newPass !== confirm) {
+                Swal.fire({ icon: 'error', title: 'Tidak Cocok', text: 'Kata sandi baru dan konfirmasi harus sama.' });
+                return;
+            }
+            if (!sbClient) {
+                Swal.fire({ icon: 'error', title: 'Database Tidak Tersedia', text: 'Tidak dapat terhubung ke database online.' });
+                return;
+            }
+            const { error } = await sbClient.auth.updateUser({ password: newPass });
+            if (error) {
+                Swal.fire({ icon: 'error', title: 'Gagal Mengubah', text: error.message });
+                return;
+            }
+            document.getElementById('changePasswordForm').reset();
+            Swal.fire({ icon: 'success', title: 'Kata Sandi Diubah', text: 'Gunakan kata sandi baru untuk login berikutnya.', confirmButtonColor: '#1d4ed8' });
+        }
 
-            if (!(await verifyPin(current))) {
-                Swal.fire({ icon: 'error', title: 'PIN Saat Ini Salah', text: 'Periksa kembali PIN yang Anda masukkan.' });
+        // ========== WEB PUSH (NOTIFIKASI ADMIN) ==========
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - base64String.length % 4) % 4);
+            const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+            return outputArray;
+        }
+        function bufToB64url(buf) {
+            const bytes = new Uint8Array(buf);
+            let s = '';
+            bytes.forEach(b => s += String.fromCharCode(b));
+            return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+        async function getPushSubscription() {
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) return null;
+            const reg = await navigator.serviceWorker.ready;
+            return await reg.pushManager.getSubscription();
+        }
+        async function updatePushStatus() {
+            const el = document.getElementById('pushStatus');
+            if (!el) return;
+            try {
+                const sub = await getPushSubscription();
+                el.innerHTML = sub
+                    ? '<span class="text-green-600 font-semibold"><i class="fa-solid fa-circle-check mr-1"></i>Notifikasi aktif di perangkat ini.</span>'
+                    : '<span class="text-gray-500">Notifikasi belum diaktifkan.</span>';
+            } catch (e) {
+                el.innerHTML = '<span class="text-gray-500">Browser tidak mendukung notifikasi.</span>';
+            }
+        }
+        async function enablePush() {
+            if (!sbClient || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+                Swal.fire({ icon: 'info', title: 'Tidak Didukung', text: 'Browser ini tidak mendukung notifikasi push. Gunakan Chrome/Edge versi terbaru.' });
                 return;
             }
-            if (!/^\d{4,10}$/.test(newPin)) {
-                Swal.fire({ icon: 'error', title: 'PIN Tidak Valid', text: 'PIN baru harus 4–10 digit angka.' });
+            let perm = Notification.permission;
+            if (perm !== 'granted') perm = await Notification.requestPermission();
+            if (perm !== 'granted') {
+                Swal.fire({ icon: 'warning', title: 'Izin Ditolak', text: 'Aktifkan izin notifikasi di pengaturan browser untuk melanjutkan.' });
                 return;
             }
-            if (newPin !== confirm) {
-                Swal.fire({ icon: 'error', title: 'PIN Tidak Cocok', text: 'PIN baru dan konfirmasi harus sama.' });
-                return;
+            const reg = await navigator.serviceWorker.ready;
+            let sub = await reg.pushManager.getSubscription();
+            if (!sub) {
+                sub = await reg.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+                });
             }
-            await setPin(newPin);
-            document.getElementById('changePinForm').reset();
-            Swal.fire({ icon: 'success', title: 'PIN Berhasil Diubah', text: 'Gunakan PIN baru untuk login berikutnya.', confirmButtonColor: '#1d4ed8' });
+            const payload = {
+                endpoint: sub.endpoint,
+                p256dh: bufToB64url(sub.getKey('p256dh')),
+                auth: bufToB64url(sub.getKey('auth')),
+                user_agent: (navigator.userAgent || '').slice(0, 200)
+            };
+            try {
+                await sbClient.from('push_subs').insert(payload);
+            } catch (e) {
+                // endpoint sudah terdaftar — tidak apa-apa
+            }
+            updatePushStatus();
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Notifikasi diaktifkan', showConfirmButton: false, timer: 1800 });
+        }
+        async function disablePush() {
+            if (!sbClient) return;
+            const sub = await getPushSubscription();
+            if (sub) {
+                const endpoint = sub.endpoint;
+                try { await sbClient.from('push_subs').delete().eq('endpoint', endpoint); } catch (e) { /* ignore */ }
+                try { await sub.unsubscribe(); } catch (e) { /* ignore */ }
+            }
+            updatePushStatus();
+            Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Notifikasi dimatikan', showConfirmButton: false, timer: 1800 });
         }
 
         function renderAdminDashboard() {
@@ -1235,6 +1309,7 @@
             if (wa) wa.value = settings.waNumber || '';
             if (email) email.value = settings.email || '';
             if (toggle) toggle.checked = !!settings.registrationOpen;
+            updatePushStatus();
         }
 
         function applySettingsToUI() {
@@ -1280,9 +1355,9 @@
         function backupData() {
             const payload = {
                 app: 'gkmr-forum',
-                version: 3,
+                version: 5,
                 exportedAt: new Date().toISOString(),
-                registrants, newsData, adminPin, settings
+                registrants, newsData, settings
             };
             const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
             const link = document.createElement('a');
@@ -1318,12 +1393,9 @@
                         if (result.isConfirmed) {
                             registrants = Array.isArray(data.registrants) ? data.registrants : [];
                             newsData = Array.isArray(data.newsData) ? data.newsData : [];
-                            if (typeof data.adminPin === 'string') adminPinRecord = data.adminPin; // legacy: dimigrasi ke hash saat login berikutnya
-                            if (data.adminPin && typeof data.adminPin === 'object' && data.adminPin.salt && data.adminPin.hash) adminPinRecord = data.adminPin;
                             if (data.settings && typeof data.settings === 'object') settings = Object.assign({ waNumber: '', email: 'info@gkmr.org', registrationOpen: true }, data.settings);
                             saveJSON(STORAGE_KEYS.registrants, registrants);
                             saveJSON(STORAGE_KEYS.news, newsData);
-                            saveJSON(STORAGE_KEYS.pin, adminPinRecord);
                             saveJSON(STORAGE_KEYS.settings, settings);
                             renderAdminDashboard();
                             renderPublicNews();
@@ -1698,6 +1770,7 @@
                 district,
                 originChurch: formData.get('originChurch') || '-',
                 registrationType: formData.get('registrationType'),
+                buktiPath: null,
                 timestamp: new Date().toISOString()
             };
 
@@ -1706,6 +1779,21 @@
                 let dbResult = { ok: false };
                 if (sbClient) {
                     try {
+                        // Upload bukti/KK dulu jika ada (publik, bucket 'bukti')
+                        const fileInput = document.getElementById('buktiFile');
+                        const file = fileInput && fileInput.files && fileInput.files[0];
+                        if (file) {
+                            if (file.size > 2 * 1024 * 1024) {
+                                Swal.fire({ icon: 'warning', title: 'File Terlalu Besar', text: 'Ukuran bukti maksimal 2 MB.' });
+                                submitBtn.innerHTML = originalBtnContent;
+                                submitBtn.disabled = false;
+                                return;
+                            }
+                            const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+                            const path = `bukti/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+                            const { error: upErr } = await sbClient.storage.from('bukti').upload(path, file, { contentType: file.type || 'application/octet-stream', upsert: false });
+                            if (!upErr) newRegistrant.buktiPath = path;
+                        }
                         dbResult = await dbInsertRegistrant(newRegistrant);
                     } catch (e) {
                         dbResult = { ok: false, error: e.message };
@@ -1879,6 +1967,7 @@
                         <div class="grid grid-cols-3 gap-2 border-b pb-2"><span class="text-gray-500 font-medium">Kabupaten</span><span class="col-span-2">${escapeHtml(p.district)}</span></div>
                         <div class="grid grid-cols-3 gap-2 border-b pb-2"><span class="text-gray-500 font-medium">Asal Gereja</span><span class="col-span-2">${escapeHtml(p.originChurch || '-')}</span></div>
                         <div class="grid grid-cols-3 gap-2 border-b pb-2"><span class="text-gray-500 font-medium">Tipe</span><span class="col-span-2">${escapeHtml(p.registrationType)}</span></div>
+                        ${p.buktiPath ? `<div class="grid grid-cols-3 gap-2 border-b pb-2"><span class="text-gray-500 font-medium">Bukti KK</span><span class="col-span-2"><a href="#" onclick="openBukti('${escapeHtml(p.buktiPath)}'); return false;" class="text-blue-600 font-semibold hover:text-blue-800"><i class="fa-solid fa-file mr-1"></i>Lihat bukti</a></span></div>` : ''}
                         <div class="grid grid-cols-3 gap-2"><span class="text-gray-500 font-medium">Status</span><span class="col-span-2">${p.status === 'Diverifikasi' ? '<span class="text-green-600 font-semibold">✓ Diverifikasi</span>' : '<span class="text-yellow-600 font-semibold">Baru</span>'}</span></div>
                     </div>
                 `,
@@ -1886,6 +1975,19 @@
                 confirmButtonText: 'Tutup',
                 confirmButtonColor: '#1d4ed8'
             });
+        }
+
+        async function openBukti(path) {
+            if (!sbClient) {
+                Swal.fire({ icon: 'error', title: 'Database Tidak Tersedia', text: 'Tidak dapat membuka bukti tanpa koneksi.' });
+                return;
+            }
+            const { data, error } = await sbClient.storage.from('bukti').createSignedUrl(path, 3600);
+            if (error || !data || !data.signedUrl) {
+                Swal.fire({ icon: 'error', title: 'Gagal Membuka', text: 'Bukti tidak ditemukan atau sudah dihapus.' });
+                return;
+            }
+            window.open(data.signedUrl, '_blank');
         }
 
         function waRegistrant(id) {
@@ -1975,10 +2077,10 @@
             }
             const payload = {
                 app: 'gkmr-forum',
-                version: 4,
+                version: 5,
                 exportedAt: new Date().toISOString(),
                 registrants: allRegistrants,
-                newsData, adminPin: adminPinRecord, settings
+                newsData, settings
             };
             const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
             const link = document.createElement('a');
@@ -2000,12 +2102,17 @@
             document.getElementById('liveRegistrantCount').textContent = registrants.length;
             applySettingsToUI();
 
-            // Auto-restore admin session
-            if (isAdminLoggedIn && document.getElementById('admin-section')) {
-                document.getElementById('adminLoginView').classList.add('hidden');
-                document.getElementById('adminDashboardView').classList.remove('hidden');
-                renderAdminDashboard();
-            }
+            // Auto-restore sesi admin (Supabase Auth) + sinkron data dari database
+            authRestoreSession().then((hasSession) => {
+                if (hasSession) {
+                    if (document.getElementById('admin-section')) {
+                        document.getElementById('adminLoginView').classList.add('hidden');
+                        document.getElementById('adminDashboardView').classList.remove('hidden');
+                        renderAdminDashboard();
+                    }
+                    refreshRegistrantsFromDb();
+                }
+            });
 
             // Escape/close mobile menu on outside click
             document.addEventListener('click', (e) => {
@@ -2025,20 +2132,7 @@
                 });
             }
 
-            // Sync data dari database online (Supabase) ke tampilan
-            if (sbClient) {
-                dbFetchRegistrants().then((res) => {
-                    if (res.ok && res.data.length > 0) {
-                        const dbRows = res.data.map(normalizeDbRow);
-                        // Gabung tanpa duplikat: data DB (terbaru) + data lokal yang belum ada di DB
-                        registrants = mergeDbRows(dbRows);
-                        saveJSON(STORAGE_KEYS.registrants, registrants);
-                        updateRegistrantsTable();
-                        updateStats();
-                        document.getElementById('liveRegistrantCount').textContent = registrants.length;
-                    }
-                }).catch(() => { /* offline — tetap pakai data lokal */ });
-            }
+            // (Sinkron data dari database online dilakukan di authRestoreSession().then — refreshRegistrantsFromDb)
         });
     </script>
 </body>
