@@ -1,0 +1,1696 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forum Pembentukan Sinode Gereja Kristen Morowali Raya (GKMR)</title>
+    <link rel="icon" href="assets/logo-gkmr.jpeg" type="image/jpeg">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#1d4ed8">
+    <meta name="description" content="Forum Pembentukan Sinode Gereja Kristen Morowali Raya (GKMR) - Pendaftaran jemaat, berita, dan informasi resmi pembentukan sinode.">
+    <!-- CSS Lokal (offline-first) -->
+    <link rel="stylesheet" href="css/app.css">
+    <link rel="stylesheet" href="assets/fa/css/all.min.css">
+    <link rel="stylesheet" href="assets/inter/inter.css">
+    <!-- SweetAlert2 lokal -->
+    <script src="assets/sweetalert2.all.min.js"></script>
+    <!-- Supabase (database online) -->
+    <script src="assets/supabase.min.js"></script>
+    <style>
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-overlay {
+            background: linear-gradient(to right, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.65));
+        }
+
+        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+        .stat-card:hover .stat-icon { transform: scale(1.1); }
+        .stat-icon { transition: transform 0.3s ease; }
+
+        .timeline-item { position: relative; padding-left: 2.5rem; }
+        .timeline-item::before {
+            content: '';
+            position: absolute; left: 0.9rem; top: 2.2rem; bottom: -1.5rem;
+            width: 2px; background: #dbeafe;
+        }
+        .timeline-item:last-child::before { display: none; }
+        .timeline-dot {
+            position: absolute; left: 0; top: 0.25rem;
+            width: 2rem; height: 2rem; border-radius: 9999px;
+            background: #1d4ed8; color: white;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.8rem; box-shadow: 0 0 0 4px #dbeafe;
+        }
+
+        .admin-tab-btn.active { border-color: #1d4ed8 !important; color: #1d4ed8 !important; }
+        .news-image { background: linear-gradient(135deg, #1d4ed8, #0ea5e9); }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased flex flex-col min-h-screen">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center gap-3 cursor-pointer" onclick="showSection('home')">
+                        <img src="assets/logo-gkmr.jpeg" alt="Logo GKMR" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2248%22 fill=%22%231d4ed8%22/><text x=%2250%22 y=%2258%22 font-size=%2232%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22Arial%22 font-weight=%22bold%22>GKMR</text></svg>'" class="w-12 h-12 object-contain rounded-full shadow-sm bg-white">
+                        <div>
+                            <span class="font-bold text-xl text-secondary block leading-tight">GKMR</span>
+                            <span class="text-xs text-gray-500 font-medium">Morowali Raya</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hidden lg:flex items-center space-x-6 xl:space-x-8">
+                    <button onclick="showSection('home')" class="text-gray-600 hover:text-primary font-medium transition-colors px-3 py-2 rounded-md nav-link" data-target="home">Beranda</button>
+                    <button onclick="showSection('about')" class="text-gray-600 hover:text-primary font-medium transition-colors px-3 py-2 rounded-md nav-link" data-target="about">Tentang Kami</button>
+                    <button onclick="showSection('vision')" class="text-gray-600 hover:text-primary font-medium transition-colors px-3 py-2 rounded-md nav-link" data-target="vision">Visi & Misi</button>
+                    <button onclick="showSection('news')" class="text-gray-600 hover:text-primary font-medium transition-colors px-3 py-2 rounded-md nav-link" data-target="news">Berita</button>
+                    <button onclick="showSection('committee')" class="text-gray-600 hover:text-primary font-medium transition-colors px-3 py-2 rounded-md nav-link" data-target="committee">Kepanitiaan</button>
+                    <button onclick="showSection('registration')" class="bg-primary hover:bg-blue-800 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg nav-link" data-target="registration">Daftar Jemaat Baru</button>
+                    <button onclick="showSection('admin')" class="text-gray-400 hover:text-gray-800 font-medium transition-colors px-3 py-2 rounded-md nav-link" data-target="admin" title="Login Admin"><i class="fa-solid fa-user-shield"></i></button>
+                </div>
+                <div class="flex items-center lg:hidden">
+                    <button id="mobile-menu-btn" class="text-gray-600 hover:text-primary focus:outline-none p-2">
+                        <i class="fa-solid fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-t border-gray-100 absolute w-full shadow-lg">
+            <div class="px-4 pt-2 pb-4 space-y-1 sm:px-3">
+                <button onclick="showSection('home'); toggleMobileMenu()" class="block w-full text-left text-gray-700 hover:bg-gray-50 hover:text-primary px-3 py-3 rounded-md text-base font-medium">Beranda</button>
+                <button onclick="showSection('about'); toggleMobileMenu()" class="block w-full text-left text-gray-700 hover:bg-gray-50 hover:text-primary px-3 py-3 rounded-md text-base font-medium">Tentang Kami</button>
+                <button onclick="showSection('vision'); toggleMobileMenu()" class="block w-full text-left text-gray-700 hover:bg-gray-50 hover:text-primary px-3 py-3 rounded-md text-base font-medium">Visi & Misi</button>
+                <button onclick="showSection('news'); toggleMobileMenu()" class="block w-full text-left text-gray-700 hover:bg-gray-50 hover:text-primary px-3 py-3 rounded-md text-base font-medium">Berita</button>
+                <button onclick="showSection('committee'); toggleMobileMenu()" class="block w-full text-left text-gray-700 hover:bg-gray-50 hover:text-primary px-3 py-3 rounded-md text-base font-medium">Kepanitiaan</button>
+                <button onclick="showSection('registration'); toggleMobileMenu()" class="block w-full text-left bg-primary text-white hover:bg-blue-800 px-3 py-3 rounded-md text-base font-medium mt-4">Daftar Jemaat Baru</button>
+                <button onclick="showSection('admin'); toggleMobileMenu()" class="block w-full text-left text-gray-700 hover:bg-gray-50 hover:text-primary px-3 py-3 rounded-md text-base font-medium border-t mt-2"><i class="fa-solid fa-user-shield mr-2"></i>Admin</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow w-full">
+
+        <!-- ==================== HOME ==================== -->
+        <section id="home-section" class="content-section block fade-in">
+            <div class="relative bg-secondary overflow-hidden">
+                <div class="absolute inset-0">
+                    <img src="assets/hero.svg" alt="Morowali Raya" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 hero-overlay"></div>
+                </div>
+                <div class="relative max-w-7xl mx-auto py-24 px-4 sm:py-32 sm:px-6 lg:px-8 flex flex-col items-center text-center">
+                    <img src="assets/logo-gkmr.jpeg" alt="Logo GKMR" class="w-24 h-24 object-contain rounded-full shadow-2xl mb-6 bg-white p-1" onerror="this.style.display='none'">
+                    <span class="text-accent font-semibold tracking-wide uppercase text-sm mb-3">Forum Pembentukan</span>
+                    <h1 class="text-4xl font-extrabold text-white sm:text-5xl lg:text-6xl tracking-tight mb-6">
+                        Sinode Gereja Kristen <br class="hidden md:block">
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-300">Morowali Raya (GKMR)</span>
+                    </h1>
+                    <p class="mt-4 max-w-3xl text-xl text-gray-300 mx-auto font-light leading-relaxed">
+                        Membangun wadah pelayanan yang lebih dekat, efektif, efisien, dan akuntabel bagi gereja-gereja di wilayah Morowali dan Morowali Utara.
+                    </p>
+                    <div class="mt-10 flex gap-4 justify-center flex-wrap">
+                        <button onclick="showSection('registration')" class="bg-primary hover:bg-blue-600 text-white px-8 py-3.5 rounded-full font-semibold text-lg transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                            Gabung Sekarang
+                        </button>
+                        <button onclick="showSection('about')" class="bg-transparent border border-gray-400 text-white hover:bg-white/10 px-8 py-3.5 rounded-full font-semibold text-lg transition-all">
+                            Pelajari Lebih Lanjut
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Info Cards -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 -mt-10 relative z-10">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-white rounded-xl shadow-md p-8 border border-gray-100 hover:shadow-xl transition-shadow flex flex-col items-center text-center">
+                        <div class="w-14 h-14 bg-blue-50 text-primary rounded-full flex items-center justify-center mb-6">
+                            <i class="fa-solid fa-hands-holding-circle text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-secondary mb-3">Efektivitas Pelayanan</h3>
+                        <p class="text-gray-600 leading-relaxed">Memperluas jangkauan misi di wilayah yang luas agar setiap jemaat terlayani dengan maksimal.</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-8 border border-gray-100 hover:shadow-xl transition-shadow flex flex-col items-center text-center">
+                        <div class="w-14 h-14 bg-blue-50 text-primary rounded-full flex items-center justify-center mb-6">
+                            <i class="fa-solid fa-users text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-secondary mb-3">Intensitas Pastoral</h3>
+                        <p class="text-gray-600 leading-relaxed">Struktur yang lebih difokuskan untuk pembinaan jemaat yang lebih cepat, dekat, dan intensif.</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-md p-8 border border-gray-100 hover:shadow-xl transition-shadow flex flex-col items-center text-center">
+                        <div class="w-14 h-14 bg-blue-50 text-primary rounded-full flex items-center justify-center mb-6">
+                            <i class="fa-solid fa-file-invoice text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-secondary mb-3">Tata Kelola Akuntabel</h3>
+                        <p class="text-gray-600 leading-relaxed">Pengelolaan administrasi dan keuangan jemaat yang lebih mandiri, transparan, dan terstruktur.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="bg-white py-16 border-t border-gray-100">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl font-bold text-secondary">Potensi Jemaat GKMR</h2>
+                        <p class="mt-4 text-lg text-gray-600">Tersebar di Kabupaten Morowali dan Morowali Utara</p>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                        <div class="p-6 stat-card">
+                            <div class="text-4xl font-extrabold text-primary mb-2">2</div>
+                            <div class="text-sm font-medium text-gray-500 uppercase tracking-wide">Kabupaten</div>
+                        </div>
+                        <div class="p-6 stat-card">
+                            <div class="text-4xl font-extrabold text-primary mb-2">6</div>
+                            <div class="text-sm font-medium text-gray-500 uppercase tracking-wide">Klasis</div>
+                        </div>
+                        <div class="p-6 stat-card">
+                            <div class="text-4xl font-extrabold text-primary mb-2">93+</div>
+                            <div class="text-sm font-medium text-gray-500 uppercase tracking-wide">Gereja/Jemaat</div>
+                        </div>
+                        <div class="p-6 stat-card">
+                            <div class="text-4xl font-extrabold text-primary mb-2" id="liveRegistrantCount">0</div>
+                            <div class="text-sm font-medium text-gray-500 uppercase tracking-wide">Terdaftar Online</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== ABOUT ==================== -->
+        <section id="about-section" class="content-section hidden fade-in py-16 bg-white">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-secondary">Latar Belakang & Tujuan</h2>
+                    <div class="w-24 h-1 bg-primary mx-auto mt-4 rounded-full"></div>
+                </div>
+
+                <div class="prose prose-lg text-gray-600 mx-auto">
+                    <p class="mb-6">
+                        Langkah pembentukan Sinode Gereja Kristen Morowali Raya (GKMR) merupakan sebuah panggilan untuk memaksimalkan pelayanan pastoral di wilayah Kabupaten Morowali Utara dan Kabupaten Morowali.
+                    </p>
+                    <p class="mb-6">
+                        Mengingat kondisi geografis dan luasnya cakupan wilayah pelayanan saat ini, para tokoh jemaat merasa perlu adanya sebuah struktur sinode baru yang lebih dekat dengan jemaat setempat. Hal ini bukan dilandasi oleh perpecahan, melainkan murni demi <strong>efektivitas pelayanan, pendekatan pastoral, dan tata kelola administrasi</strong> yang lebih baik.
+                    </p>
+
+                    <div class="bg-gray-50 p-8 rounded-xl border border-gray-200 my-10 shadow-sm">
+                        <h3 class="text-xl font-bold text-secondary mb-4 flex items-center gap-3">
+                            <i class="fa-solid fa-bullseye text-primary"></i> 3 Pilar Utama Pembentukan
+                        </h3>
+                        <ul class="space-y-4">
+                            <li class="flex items-start">
+                                <span class="bg-blue-100 text-primary rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 mt-1 flex-shrink-0">1</span>
+                                <div>
+                                    <strong class="text-gray-800 block">Efektivitas Jangkauan Misi</strong>
+                                    <span>Memperluas jangkauan pelayanan di wilayah yang selama ini dirasa belum terlayani secara maksimal karena kendala jarak.</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="bg-blue-100 text-primary rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 mt-1 flex-shrink-0">2</span>
+                                <div>
+                                    <strong class="text-gray-800 block">Intensitas Pastoral</strong>
+                                    <span>Struktur yang lebih difokuskan diharapkan mampu memberikan pembinaan iman jemaat yang lebih cepat, tanggap, dan intensif.</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="bg-blue-100 text-primary rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mr-3 mt-1 flex-shrink-0">3</span>
+                                <div>
+                                    <strong class="text-gray-800 block">Tata Kelola Administrasi</strong>
+                                    <span>Membagi beban administratif menjadi unit yang lebih spesifik wilayahnya agar pengelolaan data anggota dan keuangan jemaat lebih mandiri dan akuntabel.</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <p class="mb-6">
+                        Kehadiran GKMR diharapkan menjadi mitra strategis pemerintah dan elemen masyarakat lainnya dalam membangun kerohanian masyarakat di wilayah Morowali Raya.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VISI & MISI ==================== -->
+        <section id="vision-section" class="content-section hidden fade-in py-16 bg-gray-50">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <span class="text-primary font-semibold tracking-wide uppercase text-sm">Arah Pelayanan</span>
+                    <h2 class="text-3xl font-bold text-secondary mt-2">Visi, Misi & Tahapan</h2>
+                    <div class="w-24 h-1 bg-primary mx-auto mt-4 rounded-full"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-14">
+                    <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-8">
+                        <div class="w-14 h-14 bg-blue-50 text-primary rounded-full flex items-center justify-center mb-5">
+                            <i class="fa-solid fa-eye text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-secondary mb-3">Visi</h3>
+                        <p class="text-gray-600 leading-relaxed italic">
+                            "Terwujudnya Sinode Gereja Kristen Morowali Raya yang melayani secara efektif, efisien, dan akuntabel, serta menjadi berkat bagi masyarakat Morowali Raya."
+                        </p>
+                    </div>
+                    <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-8">
+                        <div class="w-14 h-14 bg-blue-50 text-primary rounded-full flex items-center justify-center mb-5">
+                            <i class="fa-solid fa-list-check text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-secondary mb-3">Misi</h3>
+                        <ul class="space-y-3 text-gray-600">
+                            <li class="flex gap-3"><i class="fa-solid fa-check text-primary mt-1"></i><span>Memperluas jangkauan pelayanan pastoral ke seluruh jemaat di 2 kabupaten.</span></li>
+                            <li class="flex gap-3"><i class="fa-solid fa-check text-primary mt-1"></i><span>Meningkatkan intensitas pembinaan iman dan pendampingan jemaat.</span></li>
+                            <li class="flex gap-3"><i class="fa-solid fa-check text-primary mt-1"></i><span>Membangun tata kelola administrasi dan keuangan yang transparan serta akuntabel.</span></li>
+                            <li class="flex gap-3"><i class="fa-solid fa-check text-primary mt-1"></i><span>Menjalin kemitraan strategis dengan pemerintah dan masyarakat.</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Tahapan -->
+                <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-8 md:p-10">
+                    <h3 class="text-xl font-bold text-secondary mb-8 flex items-center gap-3">
+                        <i class="fa-solid fa-route text-primary"></i> Tahapan Pembentukan Sinode
+                    </h3>
+                    <div class="space-y-8">
+                        <div class="timeline-item">
+                            <div class="timeline-dot">1</div>
+                            <h4 class="font-bold text-gray-800">Pembentukan Panitia Inti</h4>
+                            <p class="text-gray-600 text-sm mt-1">Mandat kepada para tokoh jemaat untuk menyusun dokumen legalitas dan administratif.</p>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot">2</div>
+                            <h4 class="font-bold text-gray-800">Penyusunan Draft Tata Gereja</h4>
+                            <p class="text-gray-600 text-sm mt-1">Rapat-rapat panitia untuk merancang struktur organisasi dan tata gereja GKMR.</p>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot">3</div>
+                            <h4 class="font-bold text-gray-800">Sosialisasi ke Seluruh Klasis</h4>
+                            <p class="text-gray-600 text-sm mt-1">Sosialisasi visi misi dan rencana pembentukan ke jemaat di Morowali & Morowali Utara.</p>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot">4</div>
+                            <h4 class="font-bold text-gray-800">Pendataan Jemaat</h4>
+                            <p class="text-gray-600 text-sm mt-1">Pengumpulan data jemaat melalui formulir pendaftaran online dan pendataan langsung.</p>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot">5</div>
+                            <h4 class="font-bold text-gray-800">Musyawarah Pembentukan Sinode</h4>
+                            <p class="text-gray-600 text-sm mt-1">Musyawarah bersama perwakilan jemaat untuk pengesahan tata gereja dan struktur.</p>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-dot">6</div>
+                            <h4 class="font-bold text-gray-800">Legalitas & Pengesahan</h4>
+                            <p class="text-gray-600 text-sm mt-1">Pengurusan dokumen legalitas dan pengesahan Sinode GKMR secara resmi.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== NEWS ==================== -->
+        <section id="news-section" class="content-section hidden fade-in py-16 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <span class="text-primary font-semibold tracking-wide uppercase text-sm">Informasi Terkini</span>
+                    <h2 class="text-3xl font-bold text-secondary mt-2">Berita Seputar GKMR</h2>
+                    <p class="mt-4 text-gray-600 max-w-2xl mx-auto">Ikuti perkembangan terbaru mengenai proses pembentukan Sinode Gereja Kristen Morowali Raya.</p>
+                </div>
+                <div id="publicNewsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+            </div>
+        </section>
+
+        <!-- ==================== COMMITTEE ==================== -->
+        <section id="committee-section" class="content-section hidden fade-in py-16 bg-gray-50">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <span class="text-primary font-semibold tracking-wide uppercase text-sm">Tim Penggerak</span>
+                    <h2 class="text-3xl font-bold text-secondary mt-2">Panitia Inti Pembentukan GKMR</h2>
+                    <p class="mt-4 text-gray-600 max-w-2xl mx-auto">Para tokoh yang dimandatkan untuk menyusun dokumen legalitas dan administratif guna mempersiapkan berdirinya Sinode GKMR.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-gray-200">
+                        <div class="p-8">
+                            <h3 class="text-lg font-bold text-gray-900 border-b pb-3 mb-4 flex items-center gap-2">
+                                <i class="fa-solid fa-users-gear text-primary"></i> Unsur Pimpinan
+                            </h3>
+                            <ul class="space-y-4">
+                                <li class="flex justify-between items-center p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                                    <span class="font-medium text-gray-800">Ir. Martson Lagarense, M.Si.</span>
+                                    <span class="text-xs bg-blue-100 text-primary px-2 py-1 rounded-full font-semibold">Ketua</span>
+                                </li>
+                                <li class="flex justify-between items-center p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                                    <span class="font-medium text-gray-800">Abbas Matoori, SP.</span>
+                                    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full font-semibold">Wakil Ketua I</span>
+                                </li>
+                                <li class="flex justify-between items-center p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                                    <span class="font-medium text-gray-800">Delfia Parenta, ST.</span>
+                                    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full font-semibold">Wakil Ketua II</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="p-8">
+                            <h3 class="text-lg font-bold text-gray-900 border-b pb-3 mb-4 flex items-center gap-2">
+                                <i class="fa-solid fa-file-signature text-primary"></i> Sekretariat & Keuangan
+                            </h3>
+                            <ul class="space-y-3">
+                                <li class="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                                    <span class="font-medium text-gray-800">Pitos Lameanda, SP, MP.</span>
+                                    <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">Sekretaris</span>
+                                </li>
+                                <li class="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                                    <span class="font-medium text-gray-800">Max Lumi</span>
+                                    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full font-semibold">Wk. Sekretaris I</span>
+                                </li>
+                                <li class="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                                    <span class="font-medium text-gray-800">Alberkat Kasio, SE.</span>
+                                    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full font-semibold">Wk. Sekretaris II</span>
+                                </li>
+                                <li class="flex justify-between items-center p-2 mt-4 border-t pt-4 hover:bg-gray-50 rounded-lg transition-colors">
+                                    <span class="font-medium text-gray-800">Yanus Tolemo</span>
+                                    <span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full font-semibold">Bendahara</span>
+                                </li>
+                                <li class="flex justify-between items-center p-2 hover:bg-gray-50 rounded-lg transition-colors">
+                                    <span class="font-medium text-gray-800">Dhey Moia, S.Th.</span>
+                                    <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full font-semibold">Wk. Bendahara</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== REGISTRATION ==================== -->
+        <section id="registration-section" class="content-section hidden fade-in py-12 bg-white">
+            <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                    <div class="bg-gradient-to-r from-secondary to-primary p-8 text-center text-white relative overflow-hidden">
+                        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 20px 20px;"></div>
+                        <div class="relative z-10">
+                            <i class="fa-solid fa-user-plus text-4xl mb-4"></i>
+                            <h2 class="text-3xl font-bold mb-2">Formulir Pendaftaran Jemaat</h2>
+                            <p class="text-blue-100 text-sm max-w-md mx-auto">Mari bergabung dan menjadi bagian dari keluarga besar Sinode Gereja Kristen Morowali Raya.</p>
+                        </div>
+                    </div>
+
+                    <div class="p-8">
+                        <div id="registrationClosedBanner" class="hidden bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-4 mb-6 text-sm flex items-start gap-3">
+                            <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
+                            <span>Pendaftaran jemaat baru <strong>sementara ditutup</strong>. Silakan hubungi sekretariat via WhatsApp untuk informasi lebih lanjut.</span>
+                        </div>
+                        <form id="registrationForm" onsubmit="handleRegistration(event)" novalidate>
+                            <div class="space-y-6">
+                                <div>
+                                    <h3 class="text-lg font-semibold border-b pb-2 mb-4 text-gray-800">Data Pribadi</h3>
+                                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                        <div class="sm:col-span-2">
+                                            <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap *</label>
+                                            <input type="text" id="fullName" name="fullName" required placeholder="Sesuai KTP"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors">
+                                        </div>
+                                        <div>
+                                            <label for="birthPlace" class="block text-sm font-medium text-gray-700 mb-1">Tempat Lahir</label>
+                                            <input type="text" id="birthPlace" name="birthPlace"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors">
+                                        </div>
+                                        <div>
+                                            <label for="birthDate" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Lahir *</label>
+                                            <input type="date" id="birthDate" name="birthDate" required max="2018-12-31"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors">
+                                        </div>
+                                        <div>
+                                            <label for="gender" class="block text-sm font-medium text-gray-700 mb-1">Jenis Kelamin *</label>
+                                            <select id="gender" name="gender" required
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors bg-white">
+                                                <option value="" disabled selected>Pilih...</option>
+                                                <option value="Laki-laki">Laki-laki</option>
+                                                <option value="Perempuan">Perempuan</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Nomor HP/WhatsApp *</label>
+                                            <input type="tel" id="phone" name="phone" required placeholder="08xxxxxxxxxx"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors">
+                                            <p class="text-xs text-gray-400 mt-1" id="phoneHint">Format: 08xx diikuti 8–12 digit</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="pt-4">
+                                    <h3 class="text-lg font-semibold border-b pb-2 mb-4 text-gray-800">Alamat & Pelayanan</h3>
+                                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                        <div class="sm:col-span-2">
+                                            <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Alamat Domisili Sekarang *</label>
+                                            <textarea id="address" name="address" rows="2" required placeholder="Nama jalan, desa/kelurahan, RT/RW"
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors"></textarea>
+                                        </div>
+                                        <div>
+                                            <label for="district" class="block text-sm font-medium text-gray-700 mb-1">Kabupaten *</label>
+                                            <select id="district" name="district" required
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors bg-white">
+                                                <option value="" disabled selected>Pilih Kabupaten...</option>
+                                                <option value="Morowali Utara">Morowali Utara</option>
+                                                <option value="Morowali">Morowali</option>
+                                                <option value="Lainnya">Lainnya</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="originChurch" class="block text-sm font-medium text-gray-700 mb-1">Asal Jemaat/Gereja Sebelumnya</label>
+                                            <input type="text" id="originChurch" name="originChurch" placeholder="Contoh: GKST Jemaat Immanuel..."
+                                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors">
+                                        </div>
+                                        <div class="sm:col-span-2 bg-blue-50 p-4 rounded-lg border border-blue-100 mt-2">
+                                            <label class="block text-sm font-medium text-gray-800 mb-2">Mendaftar Sebagai:</label>
+                                            <div class="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-6">
+                                                <label class="flex items-center cursor-pointer">
+                                                    <input type="radio" name="registrationType" value="Individu" checked class="w-4 h-4 text-primary bg-gray-100 border-gray-300 focus:ring-primary">
+                                                    <span class="ml-2 text-sm text-gray-700">Individu / Sendiri</span>
+                                                </label>
+                                                <label class="flex items-center cursor-pointer">
+                                                    <input type="radio" name="registrationType" value="Keluarga" class="w-4 h-4 text-primary bg-gray-100 border-gray-300 focus:ring-primary">
+                                                    <span class="ml-2 text-sm text-gray-700">Kepala Keluarga (Mewakili Anggota)</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-8 pt-4 border-t border-gray-200">
+                                <button type="submit" id="submitBtn"
+                                    class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-all flex justify-center items-center gap-2">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                    Kirim Formulir Pendaftaran
+                                </button>
+                                <p class="text-xs text-center text-gray-500 mt-4">
+                                    Data yang Anda kirimkan akan disimpan secara aman dan hanya digunakan untuk keperluan administrasi internal GKMR.
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== ADMIN ==================== -->
+        <section id="admin-section" class="content-section hidden fade-in py-16 bg-white">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+                <!-- Admin Login View -->
+                <div id="adminLoginView" class="max-w-md mx-auto bg-white rounded-xl shadow-md border border-gray-100 p-8 text-center">
+                    <div class="w-16 h-16 bg-blue-50 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-lock text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-secondary mb-2">Login Administrator</h2>
+                    <p class="text-sm text-gray-500 mb-6">Masukkan PIN keamanan untuk mengakses panel admin.</p>
+
+                    <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
+                        <input type="password" id="adminPin" required placeholder="PIN" inputmode="numeric" autocomplete="off"
+                            class="w-full px-4 py-3 text-center tracking-widest text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors mb-4">
+                        <button type="submit" class="w-full bg-secondary hover:bg-gray-800 text-white font-bold py-3 px-4 rounded-lg shadow transition-all">
+                            Masuk
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Admin Dashboard View -->
+                <div id="adminDashboardView" class="hidden">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-gray-200 pb-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-secondary">Panel Administrator</h2>
+                            <p class="text-sm text-gray-500">Kelola informasi dan data jemaat GKMR.</p>
+                        </div>
+                        <button onclick="handleAdminLogout()" class="mt-4 md:mt-0 text-red-500 hover:text-red-700 font-medium px-4 py-2 border border-red-200 hover:border-red-500 rounded-lg transition-colors flex items-center gap-2">
+                            <i class="fa-solid fa-right-from-bracket"></i> Keluar
+                        </button>
+                    </div>
+
+                    <!-- Stat Cards -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                        <div class="bg-blue-50 border border-blue-100 rounded-xl p-5 text-center">
+                            <div class="text-3xl font-extrabold text-primary" id="statRegistrants">0</div>
+                            <div class="text-xs font-medium text-gray-500 uppercase mt-1">Total Pendaftar</div>
+                        </div>
+                        <div class="bg-green-50 border border-green-100 rounded-xl p-5 text-center">
+                            <div class="text-3xl font-extrabold text-green-600" id="statMorut">0</div>
+                            <div class="text-xs font-medium text-gray-500 uppercase mt-1">Morowali Utara</div>
+                        </div>
+                        <div class="bg-amber-50 border border-amber-100 rounded-xl p-5 text-center">
+                            <div class="text-3xl font-extrabold text-amber-600" id="statMoro">0</div>
+                            <div class="text-xs font-medium text-gray-500 uppercase mt-1">Morowali</div>
+                        </div>
+                        <div class="bg-purple-50 border border-purple-100 rounded-xl p-5 text-center">
+                            <div class="text-3xl font-extrabold text-purple-600" id="statNews">0</div>
+                            <div class="text-xs font-medium text-gray-500 uppercase mt-1">Berita</div>
+                        </div>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="mb-6 border-b border-gray-200">
+                        <nav class="-mb-px flex space-x-6 lg:space-x-8 overflow-x-auto" aria-label="Tabs">
+                            <button id="btn-tab-news" onclick="switchAdminTab('news')" class="admin-tab-btn active whitespace-nowrap py-4 px-1 border-b-2 border-primary text-primary font-medium text-sm flex items-center gap-2">
+                                <i class="fa-regular fa-newspaper"></i> Kelola Berita
+                            </button>
+                            <button id="btn-tab-registrants" onclick="switchAdminTab('registrants')" class="admin-tab-btn whitespace-nowrap py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-users"></i> Data Pendaftar
+                            </button>
+                            <button id="btn-tab-settings" onclick="switchAdminTab('settings')" class="admin-tab-btn whitespace-nowrap py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-gear"></i> Pengaturan
+                            </button>
+                        </nav>
+                    </div>
+
+                    <!-- Tab: News -->
+                    <div id="admin-tab-news" class="admin-tab-content">
+                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 mb-8">
+                            <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fa-solid fa-plus-circle text-primary mr-2"></i>Tambah Berita Baru</h3>
+                            <form id="addNewsForm" onsubmit="handleAddNews(event)">
+                                <div class="grid grid-cols-1 gap-4 mb-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Judul Berita *</label>
+                                        <input type="text" id="newsTitle" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Kutipan Pendek (Excerpt) *</label>
+                                        <input type="text" id="newsExcerpt" required placeholder="Singkat, padat, jelas" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">URL Gambar (opsional)</label>
+                                        <input type="url" id="newsImage" placeholder="https://... (kosongkan untuk gambar default)" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Isi Berita Lengkap *</label>
+                                        <textarea id="newsContent" rows="4" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary outline-none"></textarea>
+                                    </div>
+                                </div>
+                                <button type="submit" class="bg-primary hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
+                                    Publikasi Berita
+                                </button>
+                            </form>
+                        </div>
+
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">Daftar Berita</h3>
+                        <div class="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Judul</th>
+                                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="adminNewsTableBody" class="bg-white divide-y divide-gray-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Registrants -->
+                    <div id="admin-tab-registrants" class="admin-tab-content hidden">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+                            <h3 class="text-lg font-bold text-gray-800">Daftar Calon Jemaat Baru</h3>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="search" id="registrantSearch" placeholder="Cari nama / gereja / HP..." oninput="updateRegistrantsTable()"
+                                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary outline-none w-full sm:w-64">
+                                <button onclick="exportRegistrantsCSV()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-file-csv"></i> Export CSV
+                                </button>
+                            </div>
+                        </div>
+                        <span class="bg-blue-100 text-primary text-xs px-3 py-1 rounded-full font-bold inline-block mb-4" id="totalRegistrantsBadge">Total: 0</span>
+                        <div class="bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama / Tgl Daftar</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kontak</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Wilayah</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipe</th>
+                                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="registrantTableBody" class="bg-white divide-y divide-gray-200"></tbody>
+                                </table>
+                            </div>
+                            <div id="noDataMsg" class="p-6 text-center text-gray-500 text-sm">
+                                Belum ada data pendaftar.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Settings -->
+                    <div id="admin-tab-settings" class="admin-tab-content hidden">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <!-- Keamanan -->
+                            <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                                <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fa-solid fa-key text-primary mr-2"></i>Ubah PIN Admin</h3>
+                                <form id="changePinForm" onsubmit="handleChangePin(event)">
+                                    <div class="grid grid-cols-1 gap-4 mb-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">PIN Saat Ini *</label>
+                                            <input type="password" id="currentPin" required inputmode="numeric" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">PIN Baru * (4–10 digit)</label>
+                                            <input type="password" id="newPin" required inputmode="numeric" minlength="4" maxlength="10" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Ulangi PIN Baru *</label>
+                                            <input type="password" id="confirmPin" required inputmode="numeric" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary outline-none">
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="bg-secondary hover:bg-gray-800 text-white font-medium py-2 px-6 rounded-lg transition-colors">
+                                        Simpan PIN Baru
+                                    </button>
+                                </form>
+                                <p class="text-xs text-gray-400 mt-4"><i class="fa-solid fa-circle-info mr-1"></i>PIN disimpan secara lokal di perangkat ini. Ganti PIN default (12345) setelah login pertama.</p>
+                            </div>
+
+                            <!-- Kontak & Pengaturan Pendaftaran -->
+                            <div class="space-y-8">
+                                <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                                    <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fa-solid fa-address-card text-primary mr-2"></i>Kontak Sekretariat</h3>
+                                    <form id="contactSettingsForm" onsubmit="handleContactSettings(event)">
+                                        <div class="grid grid-cols-1 gap-4 mb-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Nomor WhatsApp Sekretariat</label>
+                                                <input type="tel" id="setWaNumber" placeholder="6281234567890 (dengan kode negara, tanpa +)" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary outline-none">
+                                                <p class="text-xs text-gray-400 mt-1">Dipakai untuk tombol WhatsApp di halaman publik & kirim data pendaftar.</p>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-1">Email Sekretariat</label>
+                                                <input type="email" id="setEmail" placeholder="info@gkmr.org" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary outline-none">
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="bg-primary hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-colors">
+                                            Simpan Kontak
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                                    <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fa-solid fa-toggle-on text-primary mr-2"></i>Status Pendaftaran</h3>
+                                    <div class="flex items-center justify-between bg-white rounded-lg border border-gray-200 px-4 py-3">
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-800">Terima pendaftaran jemaat baru</p>
+                                            <p class="text-xs text-gray-500">Matikan jika pendaftaran sudah ditutup</p>
+                                        </div>
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" id="setRegistrationOpen" class="sr-only peer" onchange="handleRegistrationToggle()">
+                                            <div class="w-11 h-6 bg-gray-300 peer-focus:ring-2 peer-focus:ring-primary/30 rounded-full peer peer-checked:bg-green-500 transition-colors after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-5"></div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Data & Backup -->
+                            <div class="lg:col-span-2 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                                <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fa-solid fa-database text-primary mr-2"></i>Cadangan & Pulihkan Data</h3>
+                                <p class="text-sm text-gray-500 mb-4">Semua data (pendaftar, berita, PIN, pengaturan) tersimpan di browser ini. Unduh cadangan JSON secara berkala, lalu pulihkan jika perlu pindah perangkat atau browser.</p>
+                                <div class="flex flex-col sm:flex-row gap-3">
+                                    <button onclick="backupData()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-download"></i> Unduh Cadangan (JSON)
+                                    </button>
+                                    <label class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-upload"></i> Pulihkan dari File
+                                        <input type="file" id="restoreFileInput" accept=".json,application/json" class="hidden" onchange="restoreData(event)">
+                                    </label>
+                                    <button onclick="resetAllData()" class="bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 text-sm font-medium px-5 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-trash-can"></i> Hapus Semua Data
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-secondary text-gray-300 py-10 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <div class="flex items-center gap-3 mb-4 text-white">
+                        <img src="assets/logo-gkmr.jpeg" alt="Logo GKMR" class="w-10 h-10 object-contain rounded-full bg-white p-0.5" onerror="this.style.display='none'">
+                        <span class="font-bold text-xl">GKMR</span>
+                    </div>
+                    <p class="text-sm text-gray-400">
+                        Forum Pembentukan Sinode Gereja Kristen Morowali Raya. Mewujudkan pelayanan yang efektif, efisien, dan akuntabel.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Kontak Sekretariat</h4>
+                    <ul class="text-sm space-y-2 text-gray-400">
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-location-dot mt-1 w-4"></i>
+                            <span>Kolonodale, Kabupaten Morowali Utara,<br>Sulawesi Tengah</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fa-solid fa-envelope w-4"></i>
+                            <span id="footerEmail">info@gkmr.org</span>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fa-brands fa-whatsapp w-4 text-green-400"></i>
+                            <a href="#" id="footerWaLink" onclick="openWaSekretariat(); return false;" class="hover:text-white transition-colors">WhatsApp Sekretariat</a>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Tautan</h4>
+                    <ul class="text-sm space-y-2">
+                        <li><a href="#" onclick="showSection('home'); return false;" class="hover:text-white transition-colors">Beranda</a></li>
+                        <li><a href="#" onclick="showSection('about'); return false;" class="hover:text-white transition-colors">Latar Belakang</a></li>
+                        <li><a href="#" onclick="showSection('vision'); return false;" class="hover:text-white transition-colors">Visi & Misi</a></li>
+                        <li><a href="#" onclick="showSection('committee'); return false;" class="hover:text-white transition-colors">Susunan Panitia</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-8 text-sm text-center text-gray-500">
+                &copy; <span id="currentYear"></span> Forum Pembentukan Sinode GKMR. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // ========== UTIL ==========
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        const STORAGE_KEYS = {
+            registrants: 'gkmr_forum_registrants_v1',
+            news: 'gkmr_forum_news_v1',
+            pin: 'gkmr_forum_pin_v1',
+            session: 'gkmr_forum_admin_session',
+            settings: 'gkmr_forum_settings_v1'
+        };
+
+        // ========== SUPABASE (DATABASE ONLINE) ==========
+        const SUPABASE_URL = 'https://ugzdhcodmuafebrddrzw.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_ztUvrfcMQxWsWRGf98uIaQ_irDeayVP';
+        const sbClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+        const SUPABASE_ENABLED = !!sbClient;
+        const SUPABASE_TABLE = 'pendaftar';
+
+        async function dbInsertRegistrant(data) {
+            if (!sbClient) return { ok: false, error: 'Supabase tidak tersedia' };
+            const payload = {
+                full_name: data.fullName,
+                birth_place: data.birthPlace || null,
+                birth_date: data.birthDate || null,
+                gender: data.gender || null,
+                phone: data.phone,
+                address: data.address || null,
+                district: data.district || null,
+                origin_church: data.originChurch || null,
+                registration_type: data.registrationType || 'Individu',
+                status: 'Baru'
+            };
+            const { data: inserted, error } = await sbClient.from(SUPABASE_TABLE).insert(payload).select();
+            if (error) return { ok: false, error: error.message };
+            return { ok: true, data: inserted && inserted[0] };
+        }
+
+        async function dbFetchRegistrants() {
+            if (!sbClient) return { ok: false, error: 'Supabase tidak tersedia', data: [] };
+            const { data, error } = await sbClient.from(SUPABASE_TABLE).select('*').order('created_at', { ascending: false });
+            if (error) return { ok: false, error: error.message, data: [] };
+            return { ok: true, data: data || [] };
+        }
+
+        async function dbUpdateStatus(id, status) {
+            if (!sbClient) return { ok: false, error: 'Supabase tidak tersedia' };
+            const { error } = await sbClient.from(SUPABASE_TABLE).update({ status }).eq('id', id);
+            if (error) return { ok: false, error: error.message };
+            return { ok: true };
+        }
+
+        async function dbDeleteRegistrant(id) {
+            if (!sbClient) return { ok: false, error: 'Supabase tidak tersedia' };
+            const { error } = await sbClient.from(SUPABASE_TABLE).delete().eq('id', id);
+            if (error) return { ok: false, error: error.message };
+            return { ok: true };
+        }
+
+        function normalizeDbRow(row) {
+            return {
+                id: String(row.id),
+                fullName: row.full_name || '',
+                birthPlace: row.birth_place || '-',
+                birthDate: row.birth_date || '',
+                gender: row.gender || '',
+                phone: row.phone || '',
+                address: row.address || '',
+                district: row.district || '',
+                originChurch: row.origin_church || '-',
+                registrationType: row.registration_type || 'Individu',
+                status: row.status || 'Baru',
+                timestamp: row.created_at || new Date().toISOString(),
+                fromDb: true
+            };
+        }
+
+        function loadJSON(key, fallback) {
+            try {
+                const raw = localStorage.getItem(key);
+                return raw ? JSON.parse(raw) : fallback;
+            } catch (e) {
+                return fallback;
+            }
+        }
+        function saveJSON(key, value) {
+            try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* storage penuh / private mode */ }
+        }
+
+        // ========== STATE ==========
+        let registrants = loadJSON(STORAGE_KEYS.registrants, []);
+        let newsData = loadJSON(STORAGE_KEYS.news, [
+            {
+                id: 1,
+                title: "Rapat Perdana Persiapan Sinode GKMR",
+                excerpt: "Panitia inti telah melaksanakan rapat perdana untuk membahas draft tata gereja di Kolonodale.",
+                content: "Panitia inti telah melaksanakan rapat perdana untuk membahas draft tata gereja GKMR di Kolonodale. Dihadiri oleh seluruh perwakilan wilayah, rapat ini menghasilkan beberapa poin penting terkait struktur organisasi yang lebih ramping dan efisien.",
+                date: new Date(Date.now() - 86400000 * 2).toISOString(),
+                image: ""
+            },
+            {
+                id: 2,
+                title: "Sosialisasi Visi Misi ke Jemaat Morowali Utara",
+                excerpt: "Tim kerja melakukan sosialisasi terkait visi misi GKMR kepada jemaat di Morowali Utara dengan antusiasme tinggi.",
+                content: "Tim kerja melakukan sosialisasi terkait visi misi GKMR kepada jemaat di Morowali Utara. Antusiasme warga jemaat sangat tinggi untuk mendukung terbentuknya sinode baru ini demi pendekatan pelayanan pastoral yang lebih intensif.",
+                date: new Date(Date.now() - 86400000 * 5).toISOString(),
+                image: ""
+            }
+        ]);
+        let adminPin = loadJSON(STORAGE_KEYS.pin, '12345');
+        let isAdminLoggedIn = loadJSON(STORAGE_KEYS.session, false);
+        let settings = loadJSON(STORAGE_KEYS.settings, {
+            waNumber: '',
+            email: 'info@gkmr.org',
+            registrationOpen: true
+        });
+
+        // ========== MOBILE MENU ==========
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+
+        function toggleMobileMenu() {
+            mobileMenu.classList.toggle('hidden');
+        }
+
+        // ========== NAVIGATION ==========
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('block');
+            });
+            const target = document.getElementById(`${sectionId}-section`);
+            if (target) {
+                target.classList.remove('hidden');
+                target.classList.add('block');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.dataset.target !== 'registration') {
+                    link.classList.remove('text-primary', 'font-bold');
+                    link.classList.add('text-gray-600');
+                }
+                if (link.dataset.target === sectionId && sectionId !== 'registration') {
+                    link.classList.add('text-primary', 'font-bold');
+                    link.classList.remove('text-gray-600');
+                }
+            });
+            if (sectionId === 'admin' && isAdminLoggedIn) {
+                renderAdminDashboard();
+            }
+        }
+
+        // ========== ADMIN AUTH ==========
+        function handleAdminLogin(event) {
+            event.preventDefault();
+            const pin = document.getElementById('adminPin').value;
+            if (pin === String(adminPin)) {
+                isAdminLoggedIn = true;
+                saveJSON(STORAGE_KEYS.session, true);
+                document.getElementById('adminLoginView').classList.add('hidden');
+                document.getElementById('adminDashboardView').classList.remove('hidden');
+                document.getElementById('adminPin').value = '';
+                renderAdminDashboard();
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Login Admin Berhasil', showConfirmButton: false, timer: 1500 });
+            } else {
+                Swal.fire({ icon: 'error', title: 'Akses Ditolak', text: 'PIN yang Anda masukkan salah.' });
+            }
+        }
+
+        function handleAdminLogout() {
+            isAdminLoggedIn = false;
+            saveJSON(STORAGE_KEYS.session, false);
+            document.getElementById('adminLoginView').classList.remove('hidden');
+            document.getElementById('adminDashboardView').classList.add('hidden');
+            showSection('home');
+            Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Anda telah keluar', showConfirmButton: false, timer: 1500 });
+        }
+
+        function handleChangePin(event) {
+            event.preventDefault();
+            const current = document.getElementById('currentPin').value;
+            const newPin = document.getElementById('newPin').value;
+            const confirm = document.getElementById('confirmPin').value;
+
+            if (current !== String(adminPin)) {
+                Swal.fire({ icon: 'error', title: 'PIN Saat Ini Salah', text: 'Periksa kembali PIN yang Anda masukkan.' });
+                return;
+            }
+            if (!/^\d{4,10}$/.test(newPin)) {
+                Swal.fire({ icon: 'error', title: 'PIN Tidak Valid', text: 'PIN baru harus 4–10 digit angka.' });
+                return;
+            }
+            if (newPin !== confirm) {
+                Swal.fire({ icon: 'error', title: 'PIN Tidak Cocok', text: 'PIN baru dan konfirmasi harus sama.' });
+                return;
+            }
+            adminPin = newPin;
+            saveJSON(STORAGE_KEYS.pin, adminPin);
+            document.getElementById('changePinForm').reset();
+            Swal.fire({ icon: 'success', title: 'PIN Berhasil Diubah', text: 'Gunakan PIN baru untuk login berikutnya.', confirmButtonColor: '#1d4ed8' });
+        }
+
+        function renderAdminDashboard() {
+            updateStats();
+            updateRegistrantsTable();
+            renderAdminNewsTable();
+            loadSettingsIntoForm();
+        }
+
+        function loadSettingsIntoForm() {
+            const wa = document.getElementById('setWaNumber');
+            const email = document.getElementById('setEmail');
+            const toggle = document.getElementById('setRegistrationOpen');
+            if (wa) wa.value = settings.waNumber || '';
+            if (email) email.value = settings.email || '';
+            if (toggle) toggle.checked = !!settings.registrationOpen;
+        }
+
+        function applySettingsToUI() {
+            const footerEmail = document.getElementById('footerEmail');
+            if (footerEmail) footerEmail.textContent = settings.email || 'info@gkmr.org';
+            const banner = document.getElementById('registrationClosedBanner');
+            const submitBtn = document.getElementById('submitBtn');
+            if (settings.registrationOpen === false) {
+                if (banner) banner.classList.remove('hidden');
+                if (submitBtn) { submitBtn.disabled = true; submitBtn.classList.add('opacity-50', 'cursor-not-allowed'); }
+            } else {
+                if (banner) banner.classList.add('hidden');
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.classList.remove('opacity-50', 'cursor-not-allowed'); }
+            }
+        }
+
+        function handleContactSettings(event) {
+            event.preventDefault();
+            const wa = document.getElementById('setWaNumber').value.trim().replace(/[^0-9]/g, '');
+            const email = document.getElementById('setEmail').value.trim();
+            settings.waNumber = wa;
+            settings.email = email || 'info@gkmr.org';
+            saveJSON(STORAGE_KEYS.settings, settings);
+            applySettingsToUI();
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Kontak sekretariat diperbarui', showConfirmButton: false, timer: 1500 });
+        }
+
+        function handleRegistrationToggle() {
+            settings.registrationOpen = document.getElementById('setRegistrationOpen').checked;
+            saveJSON(STORAGE_KEYS.settings, settings);
+            applySettingsToUI();
+            Swal.fire({ toast: true, position: 'top-end', icon: settings.registrationOpen ? 'success' : 'warning', title: settings.registrationOpen ? 'Pendaftaran dibuka' : 'Pendaftaran ditutup', showConfirmButton: false, timer: 1500 });
+        }
+
+        function openWaSekretariat() {
+            if (!settings.waNumber) {
+                Swal.fire({ icon: 'info', title: 'Nomor WhatsApp Belum Diatur', text: 'Admin belum mengatur nomor WhatsApp sekretariat. Hubungi admin untuk memperbaruinya.' });
+                return;
+            }
+            window.open(`https://wa.me/${settings.waNumber}`, '_blank');
+        }
+
+        function backupData() {
+            const payload = {
+                app: 'gkmr-forum',
+                version: 3,
+                exportedAt: new Date().toISOString(),
+                registrants, newsData, adminPin, settings
+            };
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `gkmr-cadangan-${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Cadangan diunduh', showConfirmButton: false, timer: 1500 });
+        }
+
+        function restoreData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!data || (data.app !== 'gkmr-forum' && !data.registrants && !data.newsData)) {
+                        throw new Error('format');
+                    }
+                    Swal.fire({
+                        title: 'Pulihkan Data?',
+                        text: `File berisi ${data.registrants?.length || 0} pendaftar dan ${data.newsData?.length || 0} berita. Data saat ini akan diganti.`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#1d4ed8',
+                        cancelButtonColor: '#6b7280',
+                        confirmButtonText: 'Ya, Pulihkan',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            registrants = Array.isArray(data.registrants) ? data.registrants : [];
+                            newsData = Array.isArray(data.newsData) ? data.newsData : [];
+                            if (typeof data.adminPin === 'string') adminPin = data.adminPin;
+                            if (data.settings && typeof data.settings === 'object') settings = Object.assign({ waNumber: '', email: 'info@gkmr.org', registrationOpen: true }, data.settings);
+                            saveJSON(STORAGE_KEYS.registrants, registrants);
+                            saveJSON(STORAGE_KEYS.news, newsData);
+                            saveJSON(STORAGE_KEYS.pin, adminPin);
+                            saveJSON(STORAGE_KEYS.settings, settings);
+                            renderAdminDashboard();
+                            renderPublicNews();
+                            applySettingsToUI();
+                            document.getElementById('liveRegistrantCount').textContent = registrants.length;
+                            Swal.fire({ icon: 'success', title: 'Data Dipulihkan', text: 'Semua data berhasil dipulihkan dari file cadangan.', confirmButtonColor: '#1d4ed8' });
+                        }
+                    });
+                } catch (err) {
+                    Swal.fire({ icon: 'error', title: 'File Tidak Valid', text: 'File yang dipilih bukan cadangan GKMR yang benar.' });
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function resetAllData() {
+            Swal.fire({
+                title: 'Hapus Semua Data?',
+                html: 'Seluruh <strong>pendaftar, berita, PIN, dan pengaturan</strong> akan dihapus permanen dari perangkat ini.<br><br><span class="text-xs text-gray-500">Pastikan Anda sudah mengunduh cadangan JSON.</span>',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Hapus Semua',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.clear();
+                    location.reload();
+                }
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('statRegistrants').textContent = registrants.length;
+            document.getElementById('statMorut').textContent = registrants.filter(r => r.district === 'Morowali Utara').length;
+            document.getElementById('statMoro').textContent = registrants.filter(r => r.district === 'Morowali').length;
+            document.getElementById('statNews').textContent = newsData.length;
+        }
+
+        // ========== ADMIN TABS ==========
+        function switchAdminTab(tabId) {
+            document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.admin-tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(`admin-tab-${tabId}`).classList.remove('hidden');
+            document.getElementById(`btn-tab-${tabId}`).classList.add('active');
+            if (tabId === 'registrants') updateRegistrantsTable();
+        }
+
+        // ========== NEWS (PUBLIC) ==========
+        function renderPublicNews() {
+            const container = document.getElementById('publicNewsContainer');
+            if (!container) return;
+            container.innerHTML = '';
+            if (newsData.length === 0) {
+                container.innerHTML = '<div class="col-span-full text-center text-gray-500 py-10">Belum ada berita dipublikasikan.</div>';
+                return;
+            }
+            const sorted = [...newsData].sort((a, b) => new Date(b.date) - new Date(a.date));
+            sorted.forEach(news => {
+                const dateObj = new Date(news.date);
+                const dateStr = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow flex flex-col';
+                card.innerHTML = `
+                    <div class="h-48 news-image relative overflow-hidden">
+                        ${news.image
+                            ? `<img src="${escapeHtml(news.image)}" alt="News Image" class="w-full h-full object-cover" onerror="this.parentElement.classList.add('news-image'); this.remove()">`
+                            : `<div class="w-full h-full flex items-center justify-center"><i class="fa-solid fa-church text-5xl text-white/60"></i></div>`}
+                        <div class="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-primary shadow-sm">${dateStr}</div>
+                    </div>
+                    <div class="p-6 flex-grow flex flex-col">
+                        <h3 class="text-xl font-bold text-secondary mb-3 line-clamp-2">${escapeHtml(news.title)}</h3>
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-3">${escapeHtml(news.excerpt)}</p>
+                        <button onclick="readFullNews(${news.id})" class="mt-auto text-primary font-semibold text-sm flex items-center gap-1 hover:text-blue-800 transition-colors w-fit">
+                            Baca Selengkapnya <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = String(str ?? '');
+            return div.innerHTML;
+        }
+
+        function readFullNews(id) {
+            const news = newsData.find(n => n.id === id);
+            if (news) {
+                const dateObj = new Date(news.date);
+                const dateStr = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+                Swal.fire({
+                    title: `<h3 class="text-2xl font-bold text-left mb-2">${escapeHtml(news.title)}</h3>`,
+                    html: `
+                        ${news.image ? `<img src="${escapeHtml(news.image)}" class="w-full h-56 object-cover rounded-xl mb-6" onerror="this.remove()">` : ''}
+                        <div class="text-left text-sm text-gray-500 mb-6 border-b pb-4"><i class="fa-regular fa-calendar mr-2"></i>Dipublikasikan pada ${dateStr}</div>
+                        <div class="text-left text-gray-700 leading-relaxed whitespace-pre-line">${escapeHtml(news.content)}</div>
+                    `,
+                    width: 700,
+                    confirmButtonText: 'Tutup',
+                    confirmButtonColor: '#1d4ed8',
+                    customClass: { htmlContainer: 'text-left' }
+                });
+            }
+        }
+
+        // ========== NEWS (ADMIN) ==========
+        function renderAdminNewsTable() {
+            const tbody = document.getElementById('adminNewsTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            const sorted = [...newsData].sort((a, b) => new Date(b.date) - new Date(a.date));
+            if (sorted.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">Belum ada berita.</td></tr>';
+                return;
+            }
+            sorted.forEach(news => {
+                const dateObj = new Date(news.date);
+                const dateStr = `${dateObj.getDate()}/${dateObj.getMonth()+1}/${dateObj.getFullYear()}`;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${dateStr}</td>
+                    <td class="px-6 py-4 text-sm font-medium text-gray-900">${escapeHtml(news.title)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button onclick="editNews(${news.id})" class="text-blue-600 hover:text-blue-900 bg-blue-50 p-2 rounded-md mr-1" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteNews(${news.id})" class="text-red-600 hover:text-red-900 bg-red-50 p-2 rounded-md" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function handleAddNews(event) {
+            event.preventDefault();
+            const title = document.getElementById('newsTitle').value;
+            const excerpt = document.getElementById('newsExcerpt').value;
+            const content = document.getElementById('newsContent').value;
+            const image = document.getElementById('newsImage').value.trim();
+
+            newsData.push({ id: Date.now(), title, excerpt, content, image, date: new Date().toISOString() });
+            saveJSON(STORAGE_KEYS.news, newsData);
+            document.getElementById('addNewsForm').reset();
+            renderAdminNewsTable();
+            renderPublicNews();
+            updateStats();
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Berita berhasil dipublikasikan', showConfirmButton: false, timer: 2000 });
+        }
+
+        function editNews(id) {
+            const news = newsData.find(n => n.id === id);
+            if (!news) return;
+            Swal.fire({
+                title: 'Edit Berita',
+                html: `
+                    <input id="swal-title" class="swal2-input" placeholder="Judul Berita" value="${escapeHtml(news.title)}">
+                    <input id="swal-excerpt" class="swal2-input" placeholder="Kutipan Pendek" value="${escapeHtml(news.excerpt)}">
+                    <input id="swal-image" class="swal2-input" placeholder="URL Gambar (opsional)" value="${escapeHtml(news.image || '')}">
+                    <textarea id="swal-content" class="swal2-textarea" placeholder="Isi Berita Lengkap" rows="5">${escapeHtml(news.content)}</textarea>
+                `,
+                confirmButtonText: 'Simpan Perubahan',
+                confirmButtonColor: '#1d4ed8',
+                showCancelButton: true,
+                cancelButtonText: 'Batal',
+                preConfirm: () => {
+                    const title = document.getElementById('swal-title').value.trim();
+                    const excerpt = document.getElementById('swal-excerpt').value.trim();
+                    const content = document.getElementById('swal-content').value.trim();
+                    const image = document.getElementById('swal-image').value.trim();
+                    if (!title || !excerpt || !content) {
+                        Swal.showValidationMessage('Judul, kutipan, dan isi berita wajib diisi');
+                        return false;
+                    }
+                    return { title, excerpt, content, image };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Object.assign(news, result.value);
+                    saveJSON(STORAGE_KEYS.news, newsData);
+                    renderAdminNewsTable();
+                    renderPublicNews();
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Berita diperbarui', showConfirmButton: false, timer: 1500 });
+                }
+            });
+        }
+
+        function deleteNews(id) {
+            Swal.fire({
+                title: 'Hapus Berita?',
+                text: "Berita yang dihapus tidak dapat dikembalikan.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Hapus',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    newsData = newsData.filter(n => n.id !== id);
+                    saveJSON(STORAGE_KEYS.news, newsData);
+                    renderAdminNewsTable();
+                    renderPublicNews();
+                    updateStats();
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Berita telah dihapus', showConfirmButton: false, timer: 1500 });
+                }
+            });
+        }
+
+        // ========== REGISTRATION ==========
+        function isValidPhone(phone) {
+            const cleaned = phone.replace(/[\s\-()]/g, '');
+            return /^(?:\+62|62|0)8\d{8,12}$/.test(cleaned);
+        }
+
+        function normalizePhone(phone) {
+            return phone.replace(/[\s\-()]/g, '');
+        }
+
+        function isDuplicate(fullName, phone) {
+            const nameNorm = fullName.trim().toLowerCase();
+            const phoneNorm = normalizePhone(phone);
+            return registrants.some(r =>
+                (r.fullName.trim().toLowerCase() === nameNorm && r.phone === phoneNorm) ||
+                (r.fullName.trim().toLowerCase() === nameNorm && r.phone && normalizePhone(r.phone) === phoneNorm)
+            );
+        }
+
+        function handleRegistration(event) {
+            event.preventDefault();
+
+            // Blokir jika pendaftaran ditutup (guard di level fungsi, bukan hanya tombol)
+            if (settings.registrationOpen === false) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Pendaftaran Ditutup',
+                    text: 'Pendaftaran jemaat baru sedang ditutup. Silakan hubungi sekretariat via WhatsApp.',
+                    confirmButtonColor: '#1d4ed8'
+                });
+                return;
+            }
+
+            const form = event.target;
+            const submitBtn = document.getElementById('submitBtn');
+            const originalBtnContent = submitBtn.innerHTML;
+
+            const fullName = document.getElementById('fullName').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const birthDate = document.getElementById('birthDate').value;
+            const address = document.getElementById('address').value.trim();
+            const district = document.getElementById('district').value;
+
+            // Validasi khusus
+            if (fullName.length < 3) {
+                Swal.fire({ icon: 'warning', title: 'Nama Terlalu Pendek', text: 'Masukkan nama lengkap minimal 3 karakter.' });
+                return;
+            }
+            if (!isValidPhone(phone)) {
+                Swal.fire({ icon: 'warning', title: 'Nomor HP Tidak Valid', text: 'Gunakan format nomor Indonesia: 08xxxxxxxxxx (8–12 digit setelah 08).' });
+                document.getElementById('phone').focus();
+                return;
+            }
+            if (!birthDate) {
+                Swal.fire({ icon: 'warning', title: 'Tanggal Lahir Wajib Diisi', text: 'Mohon lengkapi tanggal lahir Anda.' });
+                return;
+            }
+            const birthYear = new Date(birthDate).getFullYear();
+            if (birthYear > 2018) {
+                Swal.fire({ icon: 'warning', title: 'Tanggal Lahir Tidak Valid', text: 'Pendaftar harus lahir tahun 2018 atau sebelumnya.' });
+                return;
+            }
+            if (address.length < 10) {
+                Swal.fire({ icon: 'warning', title: 'Alamat Terlalu Singkat', text: 'Mohon tulis alamat domisili secara lengkap (minimal 10 karakter).' });
+                return;
+            }
+            if (isDuplicate(fullName, phone)) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Data Sudah Terdaftar',
+                    text: `${fullName} dengan nomor ${phone} sudah pernah mendaftar. Hubungi sekretariat jika perlu pembaruan data.`,
+                    confirmButtonColor: '#1d4ed8'
+                });
+                return;
+            }
+
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+            submitBtn.disabled = true;
+
+            const formData = new FormData(form);
+            const newRegistrant = {
+                id: Date.now().toString(),
+                fullName,
+                birthPlace: formData.get('birthPlace') || '-',
+                birthDate,
+                gender: formData.get('gender'),
+                phone: normalizePhone(phone),
+                address,
+                district,
+                originChurch: formData.get('originChurch') || '-',
+                registrationType: formData.get('registrationType'),
+                timestamp: new Date().toISOString()
+            };
+
+            // Simpan ke Supabase (database online); fallback localStorage jika offline
+            async function persist() {
+                let dbResult = { ok: false };
+                if (sbClient) {
+                    try {
+                        dbResult = await dbInsertRegistrant(newRegistrant);
+                    } catch (e) {
+                        dbResult = { ok: false, error: e.message };
+                    }
+                }
+                if (dbResult.ok) {
+                    newRegistrant.dbId = dbResult.data ? dbResult.data.id : null;
+                }
+                // Selalu simpan lokal juga sebagai cache
+                registrants.push(newRegistrant);
+                saveJSON(STORAGE_KEYS.registrants, registrants);
+                updateRegistrantsTable();
+                updateStats();
+                document.getElementById('liveRegistrantCount').textContent = registrants.length;
+                form.reset();
+                submitBtn.innerHTML = originalBtnContent;
+                submitBtn.disabled = false;
+
+                const dbNote = dbResult.ok
+                    ? '<br><br><span class="text-xs text-green-600"><i class="fa-solid fa-cloud-arrow-up"></i> Data tersimpan di database online GKMR.</span>'
+                    : '<br><br><span class="text-xs text-amber-600"><i class="fa-solid fa-circle-exclamation"></i> Koneksi database gagal — data tersimpan lokal di perangkat ini.</span>';
+
+                Swal.fire({
+                    title: 'Pendaftaran Berhasil!',
+                    html: `Terima kasih, <strong>${escapeHtml(newRegistrant.fullName)}</strong>. Data Anda telah tersimpan di sistem.${dbNote}<br><br>
+                        <span class="text-xs text-gray-500">Lanjutkan pengiriman data via WhatsApp ke panitia? (opsional)</span>`,
+                    icon: 'success',
+                    confirmButtonColor: '#25D366',
+                    confirmButtonText: '<i class="fa-brands fa-whatsapp"></i> Kirim via WhatsApp',
+                    showCancelButton: true,
+                    cancelButtonText: 'Nanti Saja',
+                    cancelButtonColor: '#6b7280'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        openWhatsApp(newRegistrant);
+                    }
+                });
+            }
+
+            persist();
+        }
+
+        function openWhatsApp(r) {
+            const birthDateStr = r.birthDate ? new Date(r.birthDate + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-';
+            const message = encodeURIComponent(
+                `*PENDAFTARAN JEMAAT BARU GKMR*\n\n` +
+                `Nama: ${r.fullName}\n` +
+                `Tempat/Tgl Lahir: ${r.birthPlace}, ${birthDateStr}\n` +
+                `Jenis Kelamin: ${r.gender}\n` +
+                `No. HP/WA: ${r.phone}\n` +
+                `Alamat: ${r.address}\n` +
+                `Kabupaten: ${r.district}\n` +
+                `Asal Gereja: ${r.originChurch}\n` +
+                `Mendaftar Sebagai: ${r.registrationType}\n\n` +
+                `Dikirim otomatis dari situs Forum Pembentukan Sinode GKMR.`
+            );
+            if (settings.waNumber) {
+                window.open(`https://wa.me/${settings.waNumber}?text=${message}`, '_blank');
+            } else {
+                window.open(`https://wa.me/?text=${message}`, '_blank');
+            }
+        }
+
+        // ========== REGISTRANTS TABLE (ADMIN) ==========
+        function updateRegistrantsTable() {
+            const tableBody = document.getElementById('registrantTableBody');
+            const noDataMsg = document.getElementById('noDataMsg');
+            const badge = document.getElementById('totalRegistrantsBadge');
+            if (!tableBody) return;
+
+            const searchTerm = (document.getElementById('registrantSearch')?.value || '').toLowerCase();
+
+            let filtered = [...registrants].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            if (searchTerm) {
+                filtered = filtered.filter(r =>
+                    (r.fullName || '').toLowerCase().includes(searchTerm) ||
+                    (r.originChurch || '').toLowerCase().includes(searchTerm) ||
+                    (r.phone || '').toLowerCase().includes(searchTerm) ||
+                    (r.district || '').toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (badge) badge.innerText = `Total: ${registrants.length}${searchTerm ? ` (filter: ${filtered.length})` : ''}`;
+
+            tableBody.innerHTML = '';
+            if (filtered.length === 0) {
+                if (noDataMsg) {
+                    noDataMsg.textContent = searchTerm ? 'Tidak ada data yang cocok dengan pencarian.' : 'Belum ada data pendaftar.';
+                    noDataMsg.classList.remove('hidden');
+                }
+                tableBody.parentElement.classList.add('hidden');
+                return;
+            }
+
+            if (noDataMsg) noDataMsg.classList.add('hidden');
+            tableBody.parentElement.classList.remove('hidden');
+
+            filtered.forEach(person => {
+                const dateObj = new Date(person.timestamp);
+                const dateStr = `${dateObj.getDate()}/${dateObj.getMonth()+1}/${dateObj.getFullYear()}`;
+                const statusBadge = person.status === 'Diverifikasi'
+                    ? '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-700">Diverifikasi</span>'
+                    : '<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-700">Baru</span>';
+                const dbBadge = person.fromDb
+                    ? ' <span class="text-[10px] bg-sky-100 text-sky-600 px-1.5 py-0.5 rounded-full font-semibold ml-1" title="Dari database online"><i class="fa-solid fa-cloud"></i> Online</span>'
+                    : '';
+
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="h-8 w-8 rounded-full bg-blue-100 text-primary flex items-center justify-center font-bold text-sm flex-shrink-0">
+                                ${escapeHtml((person.fullName || '?').charAt(0).toUpperCase())}
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">${escapeHtml(person.fullName)}${dbBadge}</div>
+                                <div class="text-xs text-gray-500">${dateStr}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900"><i class="fa-brands fa-whatsapp text-green-500 mr-1"></i>${escapeHtml(person.phone)}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">${escapeHtml(person.district)}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${escapeHtml(person.registrationType)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${statusBadge}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button onclick="toggleVerify('${person.id}')" class="text-green-600 hover:text-green-900 bg-green-50 p-2 rounded-md mr-1" title="${person.status === 'Diverifikasi' ? 'Batalkan Verifikasi' : 'Tandai Diverifikasi'}">
+                            <i class="fa-solid ${person.status === 'Diverifikasi' ? 'fa-rotate-left' : 'fa-check'}"></i>
+                        </button>
+                        <button onclick="viewRegistrant('${person.id}')" class="text-blue-600 hover:text-blue-900 bg-blue-50 p-2 rounded-md mr-1" title="Detail"><i class="fa-solid fa-eye"></i></button>
+                        <button onclick="waRegistrant('${person.id}')" class="text-green-600 hover:text-green-900 bg-green-50 p-2 rounded-md mr-1" title="Chat WA"><i class="fa-brands fa-whatsapp"></i></button>
+                        <button onclick="deleteRegistrant('${person.id}')" class="text-red-600 hover:text-red-900 bg-red-50 p-2 rounded-md" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function toggleVerify(id) {
+            const person = registrants.find(r => r.id === id);
+            if (!person) return;
+            const newStatus = person.status === 'Diverifikasi' ? 'Baru' : 'Diverifikasi';
+            person.status = newStatus;
+            saveJSON(STORAGE_KEYS.registrants, registrants);
+            updateRegistrantsTable();
+            // Sinkron ke database online jika data berasal dari Supabase
+            if (person.fromDb && person.dbId !== undefined) {
+                dbUpdateStatus(person.dbId, newStatus);
+            }
+        }
+
+        function viewRegistrant(id) {
+            const p = registrants.find(r => r.id === id);
+            if (!p) return;
+            const dateObj = new Date(p.timestamp);
+            const dateStr = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const birthDateStr = p.birthDate ? new Date(p.birthDate + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '-';
+            Swal.fire({
+                title: `<div class="flex items-center gap-3"><div class="h-12 w-12 rounded-full bg-blue-100 text-primary flex items-center justify-center font-bold text-xl">${escapeHtml((p.fullName || '?').charAt(0).toUpperCase())}</div><div class="text-left"><div class="text-xl font-bold">${escapeHtml(p.fullName)}</div><div class="text-xs text-gray-400 font-normal">Terdaftar: ${dateStr}</div></div></div>`,
+                html: `
+                    <div class="text-left text-sm space-y-2">
+                        <div class="grid grid-cols-3 gap-2 border-b pb-2"><span class="text-gray-500 font-medium">Tempat Lahir</span><span class="col-span-2">${escapeHtml(p.birthPlace || '-')}</span></div>
+                        <div class="grid grid-cols-3 gap-2 border-b pb-2"><span class="text-gray-500 font-medium">Tanggal Lahir</span><span class="col-span-2">${birthDateStr}</span></div>
+                        <div class="grid grid-cols-3 gap-2 border-b pb-2"><span class="text-gray-500 font-medium">Jenis Kelamin</span><span class="col-span-2">${escapeHtml(p.gender)}</span></div>
+                        <div class="grid grid-cols-3 gap-2 border-b pb-2"><span class="text-gray-500 font-medium">No. HP/WA</span><span class="col-span-2">${escapeHtml(p.phone)}</span></div>
+                        <div class="grid grid-cols-3 gap-2 border-b pb-2"><span class="text-gray-500 font-medium">Alamat</span><span class="col-span-2">${escapeHtml(p.address)}</span></div>
+                        <div class="grid grid-cols-3 gap-2 border-b pb-2"><span class="text-gray-500 font-medium">Kabupaten</span><span class="col-span-2">${escapeHtml(p.district)}</span></div>
+                        <div class="grid grid-cols-3 gap-2 border-b pb-2"><span class="text-gray-500 font-medium">Asal Gereja</span><span class="col-span-2">${escapeHtml(p.originChurch || '-')}</span></div>
+                        <div class="grid grid-cols-3 gap-2 border-b pb-2"><span class="text-gray-500 font-medium">Tipe</span><span class="col-span-2">${escapeHtml(p.registrationType)}</span></div>
+                        <div class="grid grid-cols-3 gap-2"><span class="text-gray-500 font-medium">Status</span><span class="col-span-2">${p.status === 'Diverifikasi' ? '<span class="text-green-600 font-semibold">✓ Diverifikasi</span>' : '<span class="text-yellow-600 font-semibold">Baru</span>'}</span></div>
+                    </div>
+                `,
+                width: 600,
+                confirmButtonText: 'Tutup',
+                confirmButtonColor: '#1d4ed8'
+            });
+        }
+
+        function waRegistrant(id) {
+            const p = registrants.find(r => r.id === id);
+            if (!p) return;
+            window.open(`https://wa.me/${p.phone.replace(/^0/, '62')}?text=${encodeURIComponent(`Halo ${p.fullName}, kami dari Panitia Pembentukan Sinode GKMR...`)}`, '_blank');
+        }
+
+        function deleteRegistrant(id) {
+            Swal.fire({
+                title: 'Hapus Data?',
+                text: 'Data pendaftar akan dihapus permanen.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Hapus',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const person = registrants.find(r => r.id === id);
+                    registrants = registrants.filter(r => r.id !== id);
+                    saveJSON(STORAGE_KEYS.registrants, registrants);
+                    updateRegistrantsTable();
+                    updateStats();
+                    document.getElementById('liveRegistrantCount').textContent = registrants.length;
+                    // Hapus dari database online jika data berasal dari Supabase
+                    if (person && person.fromDb && person.dbId !== undefined) {
+                        dbDeleteRegistrant(person.dbId);
+                    }
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Data dihapus', showConfirmButton: false, timer: 1500 });
+                }
+            });
+        }
+
+        // ========== EXPORT CSV ==========
+        function exportRegistrantsCSV() {
+            if (registrants.length === 0) {
+                Swal.fire({ icon: 'info', title: 'Belum Ada Data', text: 'Tidak ada pendaftar untuk diekspor.' });
+                return;
+            }
+            const headers = ['Nama Lengkap', 'Tempat Lahir', 'Tanggal Lahir', 'Jenis Kelamin', 'No HP', 'Alamat', 'Kabupaten', 'Asal Gereja', 'Tipe', 'Status', 'Tanggal Daftar'];
+            const rows = registrants.map(r => [
+                r.fullName, r.birthPlace, r.birthDate, r.gender, r.phone,
+                r.address, r.district, r.originChurch, r.registrationType,
+                r.status || 'Baru', r.timestamp
+            ]);
+            const csv = [headers, ...rows]
+                .map(row => row.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(';'))
+                .join('\r\n');
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `pendaftar-gkmr-${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'CSV berhasil diunduh', showConfirmButton: false, timer: 1500 });
+        }
+
+        // ========== INIT ==========
+        window.addEventListener('DOMContentLoaded', () => {
+            showSection('home');
+            updateRegistrantsTable();
+            renderPublicNews();
+            document.getElementById('liveRegistrantCount').textContent = registrants.length;
+            applySettingsToUI();
+
+            // Auto-restore admin session
+            if (isAdminLoggedIn && document.getElementById('admin-section')) {
+                document.getElementById('adminLoginView').classList.add('hidden');
+                document.getElementById('adminDashboardView').classList.remove('hidden');
+                renderAdminDashboard();
+            }
+
+            // Escape/close mobile menu on outside click
+            document.addEventListener('click', (e) => {
+                if (!mobileMenu.classList.contains('hidden') &&
+                    !mobileMenu.contains(e.target) &&
+                    !mobileMenuBtn.contains(e.target)) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+
+            // Register Service Worker (PWA offline)
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('sw.js').catch(err => {
+                        console.warn('SW registration failed (non-fatal):', err);
+                    });
+                });
+            }
+
+            // Sync data dari database online (Supabase) ke tampilan
+            if (sbClient) {
+                dbFetchRegistrants().then((res) => {
+                    if (res.ok && res.data.length > 0) {
+                        const dbRows = res.data.map(normalizeDbRow);
+                        const dbIds = new Set(dbRows.map(r => r.dbId));
+                        // Gabung: data DB (terbaru) + data lokal yang belum ada di DB
+                        const localOnly = registrants.filter(r => !(r.fromDb && r.dbId !== undefined && dbIds.has(r.dbId)) && !r.dbId);
+                        registrants = [...dbRows, ...localOnly];
+                        saveJSON(STORAGE_KEYS.registrants, registrants);
+                        updateRegistrantsTable();
+                        updateStats();
+                        document.getElementById('liveRegistrantCount').textContent = registrants.length;
+                    }
+                }).catch(() => { /* offline — tetap pakai data lokal */ });
+            }
+        });
+    </script>
+</body>
+</html>
