@@ -1,8 +1,8 @@
 /* Service Worker — Forum Pembentukan Sinode GKMR
  * Cache-first untuk semua aset lokal agar aplikasi tetap berfungsi offline.
- * Versi cache: v1
+ * Versi cache: v2
  */
-const CACHE_NAME = 'gkmr-forum-v1';
+const CACHE_NAME = 'gkmr-forum-v2';
 const CORE_ASSETS = [
   './',
   './index.html',

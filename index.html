@@ -55,6 +55,17 @@
 
         .admin-tab-btn.active { border-color: #1d4ed8 !important; color: #1d4ed8 !important; }
         .news-image { background: linear-gradient(135deg, #1d4ed8, #0ea5e9); }
+
+        /* ===== Laporan PDF (print-to-PDF) ===== */
+        @page { size: A4; margin: 14mm; }
+        @media print {
+            body * { visibility: hidden; }
+            #reportOverlay { display: block !important; position: absolute; inset: 0; background: white !important; overflow: visible !important; z-index: 9999; }
+            #reportOverlay * { visibility: visible; }
+            #reportToolbar, .report-no-print { display: none !important; }
+            #reportOverlay .report-sheet { max-width: 100% !important; margin: 0 !important; box-shadow: none !important; border: none !important; }
+            #reportOverlay .report-pad { padding: 0 !important; }
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans antialiased flex flex-col min-h-screen">
@@ -665,6 +676,9 @@
                             <div class="flex flex-col sm:flex-row gap-2">
                                 <input type="search" id="registrantSearch" placeholder="Cari nama / gereja / HP..." oninput="updateRegistrantsTable()"
                                     class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary outline-none w-full sm:w-64">
+                                <button onclick="openReport()" class="bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-file-pdf"></i> Laporan PDF
+                                </button>
                                 <button onclick="exportRegistrantsCSV()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
                                     <i class="fa-solid fa-file-csv"></i> Export CSV
                                 </button>
@@ -885,6 +899,30 @@
             </div>
         </div>
     </footer>
+
+    <!-- ==================== LAPORAN PDF (OVERLAY) ==================== -->
+    <div id="reportOverlay" class="hidden" style="position:fixed;inset:0;background:rgba(15,23,42,0.6);z-index:60;overflow-y:auto;">
+        <div class="max-w-4xl mx-auto my-10 px-4">
+            <div class="bg-white rounded-xl shadow-2xl overflow-hidden report-sheet">
+                <div id="reportToolbar" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-secondary text-white px-6 py-4 report-no-print">
+                    <div class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-file-pdf text-red-400"></i> Pratinjau Laporan PDF</div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <select id="reportPeriod" onchange="openReport()" class="bg-gray-700 text-white text-sm rounded-lg px-3 py-2 border border-gray-600 outline-none">
+                            <option value="all">Semua Data</option>
+                            <option value="7d">7 Hari Terakhir</option>
+                            <option value="30d">30 Hari Terakhir</option>
+                            <option value="month">Bulan Ini</option>
+                        </select>
+                        <button onclick="printReport()" class="bg-primary hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2">
+                            <i class="fa-solid fa-print"></i> Cetak / Simpan PDF
+                        </button>
+                        <button onclick="closeReport()" class="bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">Tutup</button>
+                    </div>
+                </div>
+                <div id="reportContent" class="report-pad p-8 bg-white"></div>
+            </div>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script>
@@ -2092,6 +2130,102 @@
             URL.revokeObjectURL(link.href);
             Swal.close();
             Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: `Cadangan lengkap diunduh (${allRegistrants.length} pendaftar)`, showConfirmButton: false, timer: 1800 });
+        }
+
+        // ========== LAPORAN PDF ==========
+        function openReport() {
+            const period = document.getElementById('reportPeriod')?.value || 'all';
+            const now = new Date();
+            let cutoff = null;
+            if (period === '7d') cutoff = new Date(now.getTime() - 7 * 86400000);
+            if (period === '30d') cutoff = new Date(now.getTime() - 30 * 86400000);
+            if (period === 'month') cutoff = new Date(now.getFullYear(), now.getMonth(), 1);
+
+            const rows = [...registrants]
+                .filter(r => !cutoff || new Date(r.timestamp) >= cutoff)
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            const total = rows.length;
+            const verified = rows.filter(r => r.status === 'Diverifikasi').length;
+            const newCount = total - verified;
+            const morut = rows.filter(r => r.district === 'Morowali Utara').length;
+            const moro = rows.filter(r => r.district === 'Morowali').length;
+            const periodLabel = period === 'all' ? 'Semua Data' : (period === 'month' ? 'Bulan Ini' : (period === '7d' ? '7 Hari Terakhir' : '30 Hari Terakhir'));
+            const dateStr = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            const tbody = rows.map((r, i) => {
+                const d = new Date(r.timestamp);
+                const dateStr2 = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+                const birthStr = r.birthDate ? new Date(r.birthDate + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+                return `<tr style="border-bottom:1px solid #e5e7eb;">
+                    <td style="padding:6px 8px;text-align:center;">${i + 1}</td>
+                    <td style="padding:6px 8px;">${escapeHtml(r.fullName)}</td>
+                    <td style="padding:6px 8px;">${escapeHtml(birthStr)}</td>
+                    <td style="padding:6px 8px;">${escapeHtml(r.phone)}</td>
+                    <td style="padding:6px 8px;">${escapeHtml(r.district || '-')}</td>
+                    <td style="padding:6px 8px;">${escapeHtml(r.originChurch || '-')}</td>
+                    <td style="padding:6px 8px;">${escapeHtml(r.registrationType || 'Individu')}</td>
+                    <td style="padding:6px 8px;text-align:center;">${r.status === 'Diverifikasi' ? '✓ Diverifikasi' : 'Baru'}</td>
+                    <td style="padding:6px 8px;">${dateStr2}</td>
+                </tr>`;
+            }).join('');
+
+            document.getElementById('reportContent').innerHTML = `
+                <div style="text-align:center;border-bottom:3px solid #1d4ed8;padding-bottom:12px;margin-bottom:20px;">
+                    <div style="font-size:18px;font-weight:800;color:#0f172a;">FORUM PEMBENTUKAN SINODE GKMR</div>
+                    <div style="font-size:14px;font-weight:700;color:#1d4ed8;">LAPORAN DATA PENDAFTAR JEMAAT</div>
+                    <div style="font-size:11px;color:#6b7280;">Dibuat: ${dateStr} • Periode: ${periodLabel} • Total: ${total} pendaftar</div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
+                    <div style="background:#eff6ff;border:1px solid #dbeafe;border-radius:8px;padding:10px;text-align:center;">
+                        <div style="font-size:20px;font-weight:800;color:#1d4ed8;">${total}</div>
+                        <div style="font-size:10px;color:#6b7280;">TOTAL PENDAFTAR</div>
+                    </div>
+                    <div style="background:#f0fdf4;border:1px solid #dcfce7;border-radius:8px;padding:10px;text-align:center;">
+                        <div style="font-size:20px;font-weight:800;color:#16a34a;">${verified}</div>
+                        <div style="font-size:10px;color:#6b7280;">DIVERIFIKASI</div>
+                    </div>
+                    <div style="background:#fffbeb;border:1px solid #fef3c7;border-radius:8px;padding:10px;text-align:center;">
+                        <div style="font-size:20px;font-weight:800;color:#d97706;">${newCount}</div>
+                        <div style="font-size:10px;color:#6b7280;">BELUM VERIFIKASI</div>
+                    </div>
+                    <div style="background:#f5f3ff;border:1px solid #ede9fe;border-radius:8px;padding:10px;text-align:center;">
+                        <div style="font-size:20px;font-weight:800;color:#7c3aed;">${morut}</div>
+                        <div style="font-size:10px;color:#6b7280;">MOROWALI UTARA</div>
+                    </div>
+                </div>
+                <div style="font-size:12px;color:#374151;margin-bottom:6px;"><strong>Rincian Pendaftar:</strong> ${moro > 0 ? `Morowali: ${moro} • ` : ''}${periodLabel}</div>
+                ${total === 0
+                    ? '<div style="text-align:center;color:#9ca3af;padding:30px 0;">Belum ada data untuk periode ini.</div>'
+                    : `<table style="width:100%;border-collapse:collapse;font-size:11px;">
+                        <thead>
+                            <tr style="background:#0f172a;color:white;">
+                                <th style="padding:7px 8px;text-align:center;">No</th>
+                                <th style="padding:7px 8px;text-align:left;">Nama</th>
+                                <th style="padding:7px 8px;text-align:left;">Tgl Lahir</th>
+                                <th style="padding:7px 8px;text-align:left;">No. HP</th>
+                                <th style="padding:7px 8px;text-align:left;">Kabupaten</th>
+                                <th style="padding:7px 8px;text-align:left;">Asal Gereja</th>
+                                <th style="padding:7px 8px;text-align:left;">Tipe</th>
+                                <th style="padding:7px 8px;text-align:center;">Status</th>
+                                <th style="padding:7px 8px;text-align:left;">Tgl Daftar</th>
+                            </tr>
+                        </thead>
+                        <tbody>${tbody}</tbody>
+                    </table>`}
+                <div style="margin-top:28px;display:flex;justify-content:space-between;font-size:11px;color:#6b7280;">
+                    <div>Dokumen ini dibuat otomatis dari database online GKMR.<br>Data bersifat rahasia — hanya untuk keperluan administrasi panitia.</div>
+                    <div style="text-align:center;">Kolonodale, ${dateStr}<br><br><br><br>Panitia Pembentukan Sinode GKMR</div>
+                </div>
+            `;
+            document.getElementById('reportOverlay').classList.remove('hidden');
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function closeReport() {
+            document.getElementById('reportOverlay').classList.add('hidden');
         }
 
         // ========== INIT ==========
