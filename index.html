@@ -78,6 +78,7 @@
                     <button onclick="showSection('vision')" class="text-gray-600 hover:text-primary font-medium transition-colors px-3 py-2 rounded-md nav-link" data-target="vision">Visi & Misi</button>
                     <button onclick="showSection('news')" class="text-gray-600 hover:text-primary font-medium transition-colors px-3 py-2 rounded-md nav-link" data-target="news">Berita</button>
                     <button onclick="showSection('committee')" class="text-gray-600 hover:text-primary font-medium transition-colors px-3 py-2 rounded-md nav-link" data-target="committee">Kepanitiaan</button>
+                    <button onclick="showSection('check')" class="text-gray-600 hover:text-primary font-medium transition-colors px-3 py-2 rounded-md nav-link" data-target="check">Cek Status</button>
                     <button onclick="showSection('registration')" class="bg-primary hover:bg-blue-800 text-white px-5 py-2.5 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg nav-link" data-target="registration">Daftar Jemaat Baru</button>
                     <button onclick="showSection('admin')" class="text-gray-400 hover:text-gray-800 font-medium transition-colors px-3 py-2 rounded-md nav-link" data-target="admin" title="Login Admin"><i class="fa-solid fa-user-shield"></i></button>
                 </div>
@@ -96,6 +97,7 @@
                 <button onclick="showSection('vision'); toggleMobileMenu()" class="block w-full text-left text-gray-700 hover:bg-gray-50 hover:text-primary px-3 py-3 rounded-md text-base font-medium">Visi & Misi</button>
                 <button onclick="showSection('news'); toggleMobileMenu()" class="block w-full text-left text-gray-700 hover:bg-gray-50 hover:text-primary px-3 py-3 rounded-md text-base font-medium">Berita</button>
                 <button onclick="showSection('committee'); toggleMobileMenu()" class="block w-full text-left text-gray-700 hover:bg-gray-50 hover:text-primary px-3 py-3 rounded-md text-base font-medium">Kepanitiaan</button>
+                <button onclick="showSection('check'); toggleMobileMenu()" class="block w-full text-left text-gray-700 hover:bg-gray-50 hover:text-primary px-3 py-3 rounded-md text-base font-medium">Cek Status</button>
                 <button onclick="showSection('registration'); toggleMobileMenu()" class="block w-full text-left bg-primary text-white hover:bg-blue-800 px-3 py-3 rounded-md text-base font-medium mt-4">Daftar Jemaat Baru</button>
                 <button onclick="showSection('admin'); toggleMobileMenu()" class="block w-full text-left text-gray-700 hover:bg-gray-50 hover:text-primary px-3 py-3 rounded-md text-base font-medium border-t mt-2"><i class="fa-solid fa-user-shield mr-2"></i>Admin</button>
             </div>
@@ -484,6 +486,12 @@
                                 </div>
                             </div>
 
+                            <!-- Honeypot anti-spam: field tersembunyi yang hanya diisi bot -->
+                            <div aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;height:0;overflow:hidden;opacity:0">
+                                <label for="website">Jangan isi field ini</label>
+                                <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                            </div>
+
                             <div class="mt-8 pt-4 border-t border-gray-200">
                                 <button type="submit" id="submitBtn"
                                     class="w-full bg-primary hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-all flex justify-center items-center gap-2">
@@ -495,6 +503,33 @@
                                 </p>
                             </div>
                         </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== CEK STATUS ==================== -->
+        <section id="check-section" class="content-section hidden fade-in py-16 bg-gray-50">
+            <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+                    <div class="bg-gradient-to-r from-secondary to-primary p-8 text-center text-white">
+                        <i class="fa-solid fa-magnifying-glass text-4xl mb-4"></i>
+                        <h2 class="text-3xl font-bold mb-2">Cek Status Pendaftaran</h2>
+                        <p class="text-blue-100 text-sm max-w-md mx-auto">Masukkan nomor HP yang dipakai saat mendaftar untuk melihat status verifikasi Anda.</p>
+                    </div>
+                    <div class="p-8">
+                        <form id="checkStatusForm" onsubmit="checkStatus(event)" novalidate>
+                            <label for="checkPhone" class="block text-sm font-medium text-gray-700 mb-1">Nomor HP/WhatsApp *</label>
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <input type="tel" id="checkPhone" required placeholder="08xxxxxxxxxx"
+                                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-colors">
+                                <button type="submit" class="bg-primary hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow transition-all flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-magnifying-glass"></i> Cari
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-2"><i class="fa-solid fa-shield mr-1"></i>Hanya data atas nomor Anda yang ditampilkan. Data jemaat bersifat rahasia.</p>
+                        </form>
+                        <div id="checkResult" class="mt-6"></div>
                     </div>
                 </div>
             </div>
@@ -561,6 +596,9 @@
                             </button>
                             <button id="btn-tab-registrants" onclick="switchAdminTab('registrants')" class="admin-tab-btn whitespace-nowrap py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm flex items-center gap-2">
                                 <i class="fa-solid fa-users"></i> Data Pendaftar
+                            </button>
+                            <button id="btn-tab-stats" onclick="switchAdminTab('stats')" class="admin-tab-btn whitespace-nowrap py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-chart-simple"></i> Statistik
                             </button>
                             <button id="btn-tab-settings" onclick="switchAdminTab('settings')" class="admin-tab-btn whitespace-nowrap py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm flex items-center gap-2">
                                 <i class="fa-solid fa-gear"></i> Pengaturan
@@ -647,6 +685,47 @@
                         </div>
                     </div>
 
+                    <!-- Tab: Statistik -->
+                    <div id="admin-tab-stats" class="admin-tab-content hidden">
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                            <div class="bg-blue-50 border border-blue-100 rounded-xl p-5 text-center">
+                                <div class="text-3xl font-extrabold text-primary" id="statSTotal">0</div>
+                                <div class="text-xs font-medium text-gray-500 uppercase mt-1">Total Pendaftar</div>
+                            </div>
+                            <div class="bg-green-50 border border-green-100 rounded-xl p-5 text-center">
+                                <div class="text-3xl font-extrabold text-green-600" id="statSVerified">0</div>
+                                <div class="text-xs font-medium text-gray-500 uppercase mt-1">Diverifikasi</div>
+                            </div>
+                            <div class="bg-yellow-50 border border-yellow-100 rounded-xl p-5 text-center">
+                                <div class="text-3xl font-extrabold text-yellow-600" id="statSNew">0</div>
+                                <div class="text-xs font-medium text-gray-500 uppercase mt-1">Belum Diverifikasi</div>
+                            </div>
+                            <div class="bg-purple-50 border border-purple-100 rounded-xl p-5 text-center">
+                                <div class="text-3xl font-extrabold text-purple-600" id="statS7d">0</div>
+                                <div class="text-xs font-medium text-gray-500 uppercase mt-1">Pendaftar 7 Hari</div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="bg-white rounded-xl shadow border border-gray-200 p-6">
+                                <h4 class="text-sm font-bold text-gray-800 mb-4"><i class="fa-solid fa-calendar text-primary mr-2"></i>Pendaftar 7 Hari Terakhir</h4>
+                                <div id="chartDays"></div>
+                            </div>
+                            <div class="bg-white rounded-xl shadow border border-gray-200 p-6">
+                                <h4 class="text-sm font-bold text-gray-800 mb-4"><i class="fa-solid fa-location-dot text-primary mr-2"></i>Per Kabupaten</h4>
+                                <div id="chartDistricts"></div>
+                            </div>
+                            <div class="bg-white rounded-xl shadow border border-gray-200 p-6">
+                                <h4 class="text-sm font-bold text-gray-800 mb-4"><i class="fa-solid fa-church text-primary mr-2"></i>Asal Gereja Terbanyak (Top 5)</h4>
+                                <div id="chartChurches"></div>
+                            </div>
+                            <div class="bg-white rounded-xl shadow border border-gray-200 p-6">
+                                <h4 class="text-sm font-bold text-gray-800 mb-4"><i class="fa-solid fa-users text-primary mr-2"></i>Tipe & Status Pendaftaran</h4>
+                                <div id="chartTypes" class="mb-6"></div>
+                                <div id="chartStatus"></div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Tab: Settings -->
                     <div id="admin-tab-settings" class="admin-tab-content hidden">
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -715,12 +794,15 @@
                             <!-- Data & Backup -->
                             <div class="lg:col-span-2 bg-gray-50 p-6 rounded-xl border border-gray-200">
                                 <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fa-solid fa-database text-primary mr-2"></i>Cadangan & Pulihkan Data</h3>
-                                <p class="text-sm text-gray-500 mb-4">Semua data (pendaftar, berita, PIN, pengaturan) tersimpan di browser ini. Unduh cadangan JSON secara berkala, lalu pulihkan jika perlu pindah perangkat atau browser.</p>
-                                <div class="flex flex-col sm:flex-row gap-3">
-                                    <button onclick="backupData()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
-                                        <i class="fa-solid fa-download"></i> Unduh Cadangan (JSON)
+                                <p class="text-sm text-gray-500 mb-4">Data tersimpan di <strong>database online GKMR</strong> (Supabase) dan di-cache di browser ini. Unduh cadangan lengkap (online + lokal) secara berkala, lalu pulihkan jika perlu pindah perangkat atau browser.</p>
+                                <div class="flex flex-col sm:flex-row gap-3 flex-wrap">
+                                    <button onclick="backupFullData()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-cloud-arrow-up"></i> Cadangan Lengkap (DB + Lokal)
                                     </button>
-                                    <label class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-2">
+                                    <button onclick="backupData()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-download"></i> Cadangan Lokal (JSON)
+                                    </button>
+                                    <label class="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-2">
                                         <i class="fa-solid fa-upload"></i> Pulihkan dari File
                                         <input type="file" id="restoreFileInput" accept=".json,application/json" class="hidden" onchange="restoreData(event)">
                                     </label>
@@ -775,6 +857,8 @@
                         <li><a href="#" onclick="showSection('about'); return false;" class="hover:text-white transition-colors">Latar Belakang</a></li>
                         <li><a href="#" onclick="showSection('vision'); return false;" class="hover:text-white transition-colors">Visi & Misi</a></li>
                         <li><a href="#" onclick="showSection('committee'); return false;" class="hover:text-white transition-colors">Susunan Panitia</a></li>
+                        <li><a href="#" onclick="showSection('check'); return false;" class="hover:text-white transition-colors">Cek Status Pendaftaran</a></li>
+                        <li><a href="#" onclick="showSection('registration'); return false;" class="hover:text-white transition-colors">Daftar Jemaat Baru</a></li>
                     </ul>
                 </div>
             </div>
@@ -847,6 +931,7 @@
         function normalizeDbRow(row) {
             return {
                 id: String(row.id),
+                dbId: row.id, // kunci sinkronisasi ke database online
                 fullName: row.full_name || '',
                 birthPlace: row.birth_place || '-',
                 birthDate: row.birth_date || '',
@@ -860,6 +945,18 @@
                 timestamp: row.created_at || new Date().toISOString(),
                 fromDb: true
             };
+        }
+
+        // Gabung data DB (terbaru) + data lokal tanpa duplikat; self-heal cache lama
+        function mergeDbRows(dbRows) {
+            const dbIds = new Set(dbRows.map(r => r.dbId));
+            const dbStringIds = new Set(dbRows.map(r => r.id));
+            const localOnly = registrants.filter(r => {
+                if (r.dbId !== undefined) return !dbIds.has(r.dbId); // punya dbId → simpan hanya jika belum ada di DB
+                if (r.fromDb) return !dbStringIds.has(r.id);         // legacy baris DB tanpa dbId → drop jika sudah ada di DB
+                return true;                                          // data lokal murni
+            });
+            return [...dbRows, ...localOnly];
         }
 
         function loadJSON(key, fallback) {
@@ -894,8 +991,75 @@
                 image: ""
             }
         ]);
-        let adminPin = loadJSON(STORAGE_KEYS.pin, '12345');
-        let isAdminLoggedIn = loadJSON(STORAGE_KEYS.session, false);
+        let adminPinRecord = loadJSON(STORAGE_KEYS.pin, null); // {salt, hash} atau PIN plaintext lama (migrasi otomatis)
+        let isAdminLoggedIn = (() => {
+            const s = loadJSON(STORAGE_KEYS.session, false);
+            if (s === true) return true; // sesi lama (boolean) — tetap valid
+            if (s && s.loggedIn && s.at) {
+                // Sesi admin kedaluwarsa setelah 12 jam
+                if (Date.now() - s.at > 12 * 60 * 60 * 1000) {
+                    saveJSON(STORAGE_KEYS.session, false);
+                    return false;
+                }
+                return true;
+            }
+            return false;
+        })();
+        let pinLock = loadJSON('gkmr_forum_pin_lock_v1', { fails: 0, lockedUntil: 0 });
+
+        // ========== KEAMANAN PIN (SHA-256 + salt, anti brute-force) ==========
+        function randomSalt(len) {
+            const arr = new Uint8Array(len);
+            crypto.getRandomValues(arr);
+            return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+        async function hashPin(pin, salt) {
+            const data = new TextEncoder().encode(`${salt}::${pin}`);
+            const digest = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+        async function verifyPin(pin) {
+            if (!adminPinRecord) {
+                // Default PIN awal (12345) untuk perangkat baru — langsung migrasi ke hash saat login pertama
+                const ok = (pin === '12345');
+                if (ok) {
+                    const salt = randomSalt(16);
+                    adminPinRecord = { salt, hash: await hashPin(pin, salt) };
+                    saveJSON(STORAGE_KEYS.pin, adminPinRecord);
+                }
+                return ok;
+            }
+            // Migrasi otomatis: PIN plaintext lama → hash
+            if (typeof adminPinRecord === 'string') {
+                const ok = (pin === adminPinRecord);
+                if (ok) {
+                    const salt = randomSalt(16);
+                    adminPinRecord = { salt, hash: await hashPin(pin, salt) };
+                    saveJSON(STORAGE_KEYS.pin, adminPinRecord);
+                }
+                return ok;
+            }
+            const h = await hashPin(pin, adminPinRecord.salt);
+            return h === adminPinRecord.hash;
+        }
+        async function setPin(pin) {
+            const salt = randomSalt(16);
+            adminPinRecord = { salt, hash: await hashPin(pin, salt) };
+            saveJSON(STORAGE_KEYS.pin, adminPinRecord);
+        }
+        function pinLockRemaining() {
+            if (pinLock.lockedUntil && Date.now() < pinLock.lockedUntil) return Math.ceil((pinLock.lockedUntil - Date.now()) / 1000);
+            return 0;
+        }
+        function registerPinFail() {
+            pinLock.fails = (pinLock.fails || 0) + 1;
+            if (pinLock.fails >= 5) {
+                pinLock.lockedUntil = Date.now() + 60 * 1000; // kunci 60 detik setelah 5x salah
+                pinLock.fails = 0;
+            }
+            saveJSON('gkmr_forum_pin_lock_v1', pinLock);
+        }
+        function resetPinLock() { pinLock = { fails: 0, lockedUntil: 0 }; saveJSON('gkmr_forum_pin_lock_v1', pinLock); }
         let settings = loadJSON(STORAGE_KEYS.settings, {
             waNumber: '',
             email: 'info@gkmr.org',
@@ -938,20 +1102,89 @@
             }
         }
 
-        // ========== ADMIN AUTH ==========
-        function handleAdminLogin(event) {
+        // ========== CEK STATUS (PUBLIC) ==========
+        async function checkStatus(event) {
             event.preventDefault();
+            const phoneRaw = document.getElementById('checkPhone').value.trim();
+            if (!isValidPhone(phoneRaw)) {
+                Swal.fire({ icon: 'warning', title: 'Nomor HP Tidak Valid', text: 'Gunakan format nomor Indonesia: 08xxxxxxxxxx.' });
+                return;
+            }
+            const phone = normalizePhone(phoneRaw);
+            const resultEl = document.getElementById('checkResult');
+            resultEl.innerHTML = '<div class="text-center py-6 text-gray-500 text-sm"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Memeriksa data...</div>';
+
+            let pool = [...registrants];
+            if (sbClient) {
+                try {
+                    const res = await dbFetchRegistrants();
+                    if (res.ok && res.data.length) {
+                        const dbRows = res.data.map(normalizeDbRow);
+                        pool = mergeDbRows(dbRows);
+                    }
+                } catch (e) { /* offline — pakai data lokal */ }
+            }
+
+            const digits = phone.replace(/[^0-9]/g, '');
+            const found = pool.filter(r => {
+                const rd = String(r.phone || '').replace(/[^0-9]/g, '');
+                return rd === digits || rd === digits.replace(/^0/, '62') || rd === digits.replace(/^0/, '+62');
+            });
+
+            if (found.length === 0) {
+                resultEl.innerHTML = `
+                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-6 text-center">
+                        <i class="fa-solid fa-circle-question text-4xl text-amber-500 mb-3"></i>
+                        <p class="font-bold text-gray-800">Data tidak ditemukan</p>
+                        <p class="text-sm text-gray-600 mt-1">Nomor <strong>${escapeHtml(phone)}</strong> belum terdaftar. Pastikan nomor sesuai saat pendaftaran, atau hubungi sekretariat via WhatsApp.</p>
+                    </div>`;
+                return;
+            }
+
+            const p = found[found.length - 1]; // data terbaru
+            const dateObj = new Date(p.timestamp);
+            const dateStr = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            const verified = p.status === 'Diverifikasi';
+            resultEl.innerHTML = `
+                <div class="${verified ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'} border rounded-xl p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 rounded-full ${verified ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-primary'} flex items-center justify-center text-xl font-bold">${escapeHtml((p.fullName || '?').charAt(0).toUpperCase())}</div>
+                        <div>
+                            <div class="font-bold text-gray-900 text-lg">${escapeHtml(p.fullName)}</div>
+                            <div class="text-xs text-gray-500">Terdaftar: ${dateStr} • ${escapeHtml(p.district || '-')}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 p-3 rounded-lg ${verified ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}">
+                        <i class="fa-solid ${verified ? 'fa-circle-check' : 'fa-clock'}"></i>
+                        <span class="font-semibold text-sm">${verified ? '✓ Status: Diverifikasi — data Anda telah dikonfirmasi panitia.' : 'Status: Baru — data Anda masih menunggu verifikasi panitia.'}</span>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-4">Pertanyaan? Hubungi sekretariat via <a href="#" onclick="openWaSekretariat(); return false;" class="text-green-600 font-semibold">WhatsApp</a>.</p>
+                </div>`;
+        }
+
+        // ========== ADMIN AUTH ==========
+        async function handleAdminLogin(event) {
+            event.preventDefault();
+            const remaining = pinLockRemaining();
+            if (remaining > 0) {
+                Swal.fire({ icon: 'error', title: 'Terlalu Banyak Percobaan', text: `Panel admin terkunci. Coba lagi dalam ${remaining} detik.` });
+                return;
+            }
             const pin = document.getElementById('adminPin').value;
-            if (pin === String(adminPin)) {
+            const ok = await verifyPin(pin);
+            if (ok) {
                 isAdminLoggedIn = true;
-                saveJSON(STORAGE_KEYS.session, true);
+                saveJSON(STORAGE_KEYS.session, { loggedIn: true, at: Date.now() });
+                resetPinLock();
                 document.getElementById('adminLoginView').classList.add('hidden');
                 document.getElementById('adminDashboardView').classList.remove('hidden');
                 document.getElementById('adminPin').value = '';
                 renderAdminDashboard();
                 Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Login Admin Berhasil', showConfirmButton: false, timer: 1500 });
             } else {
-                Swal.fire({ icon: 'error', title: 'Akses Ditolak', text: 'PIN yang Anda masukkan salah.' });
+                registerPinFail();
+                const remaining2 = pinLockRemaining();
+                Swal.fire({ icon: 'error', title: 'Akses Ditolak', text: remaining2 > 0 ? `PIN salah. Panel terkunci ${remaining2} detik.` : 'PIN yang Anda masukkan salah.' });
             }
         }
 
@@ -964,13 +1197,13 @@
             Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Anda telah keluar', showConfirmButton: false, timer: 1500 });
         }
 
-        function handleChangePin(event) {
+        async function handleChangePin(event) {
             event.preventDefault();
             const current = document.getElementById('currentPin').value;
             const newPin = document.getElementById('newPin').value;
             const confirm = document.getElementById('confirmPin').value;
 
-            if (current !== String(adminPin)) {
+            if (!(await verifyPin(current))) {
                 Swal.fire({ icon: 'error', title: 'PIN Saat Ini Salah', text: 'Periksa kembali PIN yang Anda masukkan.' });
                 return;
             }
@@ -982,8 +1215,7 @@
                 Swal.fire({ icon: 'error', title: 'PIN Tidak Cocok', text: 'PIN baru dan konfirmasi harus sama.' });
                 return;
             }
-            adminPin = newPin;
-            saveJSON(STORAGE_KEYS.pin, adminPin);
+            await setPin(newPin);
             document.getElementById('changePinForm').reset();
             Swal.fire({ icon: 'success', title: 'PIN Berhasil Diubah', text: 'Gunakan PIN baru untuk login berikutnya.', confirmButtonColor: '#1d4ed8' });
         }
@@ -993,6 +1225,7 @@
             updateRegistrantsTable();
             renderAdminNewsTable();
             loadSettingsIntoForm();
+            renderStats();
         }
 
         function loadSettingsIntoForm() {
@@ -1085,11 +1318,12 @@
                         if (result.isConfirmed) {
                             registrants = Array.isArray(data.registrants) ? data.registrants : [];
                             newsData = Array.isArray(data.newsData) ? data.newsData : [];
-                            if (typeof data.adminPin === 'string') adminPin = data.adminPin;
+                            if (typeof data.adminPin === 'string') adminPinRecord = data.adminPin; // legacy: dimigrasi ke hash saat login berikutnya
+                            if (data.adminPin && typeof data.adminPin === 'object' && data.adminPin.salt && data.adminPin.hash) adminPinRecord = data.adminPin;
                             if (data.settings && typeof data.settings === 'object') settings = Object.assign({ waNumber: '', email: 'info@gkmr.org', registrationOpen: true }, data.settings);
                             saveJSON(STORAGE_KEYS.registrants, registrants);
                             saveJSON(STORAGE_KEYS.news, newsData);
-                            saveJSON(STORAGE_KEYS.pin, adminPin);
+                            saveJSON(STORAGE_KEYS.pin, adminPinRecord);
                             saveJSON(STORAGE_KEYS.settings, settings);
                             renderAdminDashboard();
                             renderPublicNews();
@@ -1131,6 +1365,69 @@
             document.getElementById('statNews').textContent = newsData.length;
         }
 
+        // ========== STATISTIK (ADMIN) ==========
+        function renderStats() {
+            if (!document.getElementById('admin-tab-stats')) return;
+            const total = registrants.length;
+            document.getElementById('statSTotal').textContent = total;
+            document.getElementById('statSVerified').textContent = registrants.filter(r => r.status === 'Diverifikasi').length;
+            document.getElementById('statSNew').textContent = registrants.filter(r => r.status !== 'Diverifikasi').length;
+
+            // 7 hari terakhir
+            const days = [];
+            let count7d = 0;
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setHours(0, 0, 0, 0);
+                d.setDate(d.getDate() - i);
+                const key = d.toISOString().slice(0, 10);
+                const count = registrants.filter(r => (r.timestamp || '').slice(0, 10) === key).length;
+                count7d += count;
+                days.push({ label: d.toLocaleDateString('id-ID', { weekday: 'short' }), value: count });
+            }
+            document.getElementById('statS7d').textContent = count7d;
+            renderBarChart('chartDays', days, 'Pendaftar 7 Hari Terakhir');
+
+            // Per kabupaten
+            const districts = {};
+            registrants.forEach(r => { const k = r.district || 'Lainnya'; districts[k] = (districts[k] || 0) + 1; });
+            renderBarChart('chartDistricts', Object.entries(districts).map(([label, value]) => ({ label, value })), 'Per Kabupaten');
+
+            // Asal gereja top 5
+            const churches = {};
+            registrants.forEach(r => { const k = (r.originChurch && r.originChurch !== '-') ? r.originChurch : 'Tidak diisi'; churches[k] = (churches[k] || 0) + 1; });
+            const topChurches = Object.entries(churches).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([label, value]) => ({ label, value }));
+            renderBarChart('chartChurches', topChurches, 'Asal Gereja Terbanyak');
+
+            // Tipe pendaftaran
+            const types = {};
+            registrants.forEach(r => { const k = r.registrationType || 'Individu'; types[k] = (types[k] || 0) + 1; });
+            renderBarChart('chartTypes', Object.entries(types).map(([label, value]) => ({ label, value })), 'Tipe Pendaftaran');
+
+            // Status verifikasi
+            const statuses = { Diverifikasi: 0, Baru: 0 };
+            registrants.forEach(r => { statuses[r.status === 'Diverifikasi' ? 'Diverifikasi' : 'Baru']++; });
+            renderBarChart('chartStatus', Object.entries(statuses).map(([label, value]) => ({ label, value })), 'Status Verifikasi');
+        }
+
+        function renderBarChart(containerId, items, fallbackTitle) {
+            const el = document.getElementById(containerId);
+            if (!el) return;
+            if (!items.length) {
+                el.innerHTML = '<div class="text-sm text-gray-400 py-6 text-center">Belum ada data untuk ditampilkan.</div>';
+                return;
+            }
+            const max = Math.max(...items.map(i => i.value), 1);
+            el.innerHTML = items.map(i => `
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-28 sm:w-40 text-xs text-gray-600 font-medium truncate text-right">${escapeHtml(i.label)}</div>
+                    <div class="flex-1 bg-gray-100 rounded-full h-5 overflow-hidden">
+                        <div class="h-full rounded-full bg-primary transition-all" style="width:${Math.max(4, Math.round(i.value / max * 100))}%"></div>
+                    </div>
+                    <div class="w-8 text-xs font-bold text-gray-800 text-left">${i.value}</div>
+                </div>`).join('');
+        }
+
         // ========== ADMIN TABS ==========
         function switchAdminTab(tabId) {
             document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
@@ -1138,6 +1435,7 @@
             document.getElementById(`admin-tab-${tabId}`).classList.remove('hidden');
             document.getElementById(`btn-tab-${tabId}`).classList.add('active');
             if (tabId === 'registrants') updateRegistrantsTable();
+            if (tabId === 'stats') renderStats();
         }
 
         // ========== NEWS (PUBLIC) ==========
@@ -1322,6 +1620,14 @@
 
         function handleRegistration(event) {
             event.preventDefault();
+
+            // Anti-spam: honeypot terisi = bot → anggap berhasil tanpa menyimpan apa pun
+            const honeypot = document.getElementById('website');
+            if (honeypot && honeypot.value.trim() !== '') {
+                event.target.reset();
+                Swal.fire({ icon: 'success', title: 'Pendaftaran Berhasil!', text: 'Terima kasih, data Anda telah tersimpan.', confirmButtonColor: '#1d4ed8' });
+                return;
+            }
 
             // Blokir jika pendaftaran ditutup (guard di level fungsi, bukan hanya tombol)
             if (settings.registrationOpen === false) {
@@ -1615,19 +1921,31 @@
             });
         }
 
-        // ========== EXPORT CSV ==========
-        function exportRegistrantsCSV() {
-            if (registrants.length === 0) {
+        // ========== EXPORT CSV (DATABASE ONLINE + LOKAL) ==========
+        async function exportRegistrantsCSV() {
+            Swal.fire({ title: 'Menyiapkan data...', text: 'Mengambil data terbaru dari database online...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            let rows = [...registrants];
+            if (sbClient) {
+                try {
+                    const res = await dbFetchRegistrants();
+                    if (res.ok && res.data.length) {
+                        const dbRows = res.data.map(normalizeDbRow);
+                        rows = mergeDbRows(dbRows);
+                    }
+                } catch (e) { /* offline — pakai data lokal */ }
+            }
+            if (rows.length === 0) {
+                Swal.close();
                 Swal.fire({ icon: 'info', title: 'Belum Ada Data', text: 'Tidak ada pendaftar untuk diekspor.' });
                 return;
             }
-            const headers = ['Nama Lengkap', 'Tempat Lahir', 'Tanggal Lahir', 'Jenis Kelamin', 'No HP', 'Alamat', 'Kabupaten', 'Asal Gereja', 'Tipe', 'Status', 'Tanggal Daftar'];
-            const rows = registrants.map(r => [
+            const headers = ['Nama Lengkap', 'Tempat Lahir', 'Tanggal Lahir', 'Jenis Kelamin', 'No HP', 'Alamat', 'Kabupaten', 'Asal Gereja', 'Tipe', 'Status', 'Tanggal Daftar', 'Sumber'];
+            const rowsCsv = rows.map(r => [
                 r.fullName, r.birthPlace, r.birthDate, r.gender, r.phone,
                 r.address, r.district, r.originChurch, r.registrationType,
-                r.status || 'Baru', r.timestamp
+                r.status || 'Baru', r.timestamp, r.fromDb ? 'Database Online' : 'Lokal'
             ]);
-            const csv = [headers, ...rows]
+            const csv = [headers, ...rowsCsv]
                 .map(row => row.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(';'))
                 .join('\r\n');
             const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -1638,7 +1956,40 @@
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(link.href);
-            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'CSV berhasil diunduh', showConfirmButton: false, timer: 1500 });
+            Swal.close();
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: `CSV diunduh (${rows.length} data)`, showConfirmButton: false, timer: 1500 });
+        }
+
+        // ========== BACKUP LENGKAP (DATABASE ONLINE + LOKAL) ==========
+        async function backupFullData() {
+            Swal.fire({ title: 'Menyiapkan cadangan...', text: 'Menggabungkan data online dan lokal...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            let allRegistrants = [...registrants];
+            if (sbClient) {
+                try {
+                    const res = await dbFetchRegistrants();
+                    if (res.ok && res.data.length) {
+                        const dbRows = res.data.map(normalizeDbRow);
+                        allRegistrants = mergeDbRows(dbRows);
+                    }
+                } catch (e) { /* offline */ }
+            }
+            const payload = {
+                app: 'gkmr-forum',
+                version: 4,
+                exportedAt: new Date().toISOString(),
+                registrants: allRegistrants,
+                newsData, adminPin: adminPinRecord, settings
+            };
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `gkmr-cadangan-lengkap-${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+            Swal.close();
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: `Cadangan lengkap diunduh (${allRegistrants.length} pendaftar)`, showConfirmButton: false, timer: 1800 });
         }
 
         // ========== INIT ==========
@@ -1679,10 +2030,8 @@
                 dbFetchRegistrants().then((res) => {
                     if (res.ok && res.data.length > 0) {
                         const dbRows = res.data.map(normalizeDbRow);
-                        const dbIds = new Set(dbRows.map(r => r.dbId));
-                        // Gabung: data DB (terbaru) + data lokal yang belum ada di DB
-                        const localOnly = registrants.filter(r => !(r.fromDb && r.dbId !== undefined && dbIds.has(r.dbId)) && !r.dbId);
-                        registrants = [...dbRows, ...localOnly];
+                        // Gabung tanpa duplikat: data DB (terbaru) + data lokal yang belum ada di DB
+                        registrants = mergeDbRows(dbRows);
                         saveJSON(STORAGE_KEYS.registrants, registrants);
                         updateRegistrantsTable();
                         updateStats();
