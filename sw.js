@@ -16,6 +16,7 @@ const CORE_ASSETS = [
   './assets/fa/webfonts/fa-brands-400.ttf',
   './assets/sweetalert2.all.min.js',
   './assets/supabase.min.js',
+  './assets/xlsx.full.min.js',
   './assets/inter/inter.css',
   './assets/inter/inter-1.woff2',
   './assets/inter/inter-2.woff2',

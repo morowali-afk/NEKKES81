@@ -735,15 +735,26 @@
                     <div id="admin-tab-registrants" class="admin-tab-content hidden">
                         <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
                             <h3 class="text-lg font-bold text-gray-800">Daftar Calon Jemaat Baru</h3>
-                            <div class="flex flex-col sm:flex-row gap-2">
-                                <input type="search" id="registrantSearch" placeholder="Cari nama / gereja / HP..." oninput="updateRegistrantsTable()"
-                                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary outline-none w-full sm:w-64">
-                                <button onclick="openReport()" class="bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
-                                    <i class="fa-solid fa-file-pdf"></i> Laporan PDF
-                                </button>
-                                <button onclick="exportRegistrantsCSV()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
-                                    <i class="fa-solid fa-file-csv"></i> Export CSV
-                                </button>
+                            <div class="flex flex-col gap-2">
+                                <div class="flex items-center gap-2">
+                                    <div class="bg-gray-100 rounded-lg p-1 flex">
+                                        <button id="btnViewActive" onclick="switchTableView('active')" class="px-3 py-1.5 rounded-md text-xs font-bold bg-white shadow text-primary">Aktif</button>
+                                        <button id="btnViewArchive" onclick="switchTableView('archive')" class="px-3 py-1.5 rounded-md text-xs font-bold text-gray-500">Arsip</button>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col sm:flex-row gap-2">
+                                    <input type="search" id="registrantSearch" placeholder="Cari nama / gereja / HP..." oninput="updateRegistrantsTable()"
+                                        class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary outline-none w-full sm:w-64">
+                                    <button onclick="openReport()" class="bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-file-pdf"></i> Laporan PDF
+                                    </button>
+                                    <button onclick="exportExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-file-excel"></i> Excel
+                                    </button>
+                                    <button onclick="exportRegistrantsCSV()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-file-csv"></i> CSV
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <span class="bg-blue-100 text-primary text-xs px-3 py-1 rounded-full font-bold inline-block mb-4" id="totalRegistrantsBadge">Total: 0</span>
@@ -767,6 +778,7 @@
                                 Belum ada data pendaftar.
                             </div>
                         </div>
+                        <div id="tablePagination" class="hidden flex items-center justify-between gap-3 mt-4 bg-white rounded-xl shadow border border-gray-200 px-4 py-3"></div>
                     </div>
 
                     <!-- Tab: Statistik -->
@@ -832,6 +844,20 @@
                                     </button>
                                 </form>
                                 <p class="text-xs text-gray-400 mt-4"><i class="fa-solid fa-circle-info mr-1"></i>Kata sandi tersimpan di database online (Supabase Auth) dan berlaku di semua perangkat.</p>
+                            </div>
+
+                            <!-- Kelola Admin -->
+                            <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                                <h3 class="text-lg font-bold text-gray-800 mb-4"><i class="fa-solid fa-users-gear text-primary mr-2"></i>Kelola Admin</h3>
+                                <div id="adminList" class="space-y-2 mb-4">
+                                    <div class="text-xs text-gray-400">Memuat...</div>
+                                </div>
+                                <form id="addAdminForm" onsubmit="addAdmin(event)" class="flex flex-col sm:flex-row gap-2">
+                                    <input type="email" id="newAdminEmail" required placeholder="email admin@contoh.org" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary outline-none">
+                                    <input type="text" id="newAdminName" placeholder="Nama (opsional)" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-primary focus:border-primary outline-none">
+                                    <button type="submit" class="bg-primary hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors">Tambah</button>
+                                </form>
+                                <p class="text-xs text-gray-400 mt-2"><i class="fa-solid fa-circle-info mr-1"></i>Admin dapat login & mengelola data. Anda tidak bisa menghapus akun sendiri.</p>
                             </div>
 
                             <!-- Kontak & Pengaturan Pendaftaran -->
@@ -1070,6 +1096,7 @@
                 registrationType: row.registration_type || 'Individu',
                 status: row.status || 'Baru',
                 buktiPath: row.bukti_path || null,
+                archivedAt: row.archived_at || null,
                 timestamp: row.created_at || new Date().toISOString(),
                 fromDb: true
             };
@@ -1207,12 +1234,15 @@
                 } catch (e) { /* lanjut ke fallback lokal */ }
             }
 
-            // Fallback: cache lokal (mode offline)
+            // Fallback: cache lokal (mode offline) — kecualikan data arsip
             const digits = phone.replace(/[^0-9]/g, '');
-            const found = registrants.filter(r => {
-                const rd = String(r.phone || '').replace(/[^0-9]/g, '');
-                return rd === digits || rd === digits.replace(/^0/, '62') || rd === digits.replace(/^0/, '+62');
-            });
+            const found = registrants.filter(r =>
+                !r.archivedAt &&
+                (() => {
+                    const rd = String(r.phone || '').replace(/[^0-9]/g, '');
+                    return rd === digits || rd === digits.replace(/^0/, '62') || rd === digits.replace(/^0/, '+62');
+                })()
+            );
 
             if (found.length === 0) {
                 resultEl.innerHTML = `
@@ -1410,6 +1440,7 @@
             if (email) email.value = settings.email || '';
             if (toggle) toggle.checked = !!settings.registrationOpen;
             updatePushStatus();
+            loadAdmins();
         }
 
         function applySettingsToUI() {
@@ -1785,8 +1816,9 @@
             const nameNorm = fullName.trim().toLowerCase();
             const phoneNorm = normalizePhone(phone);
             return registrants.some(r =>
-                (r.fullName.trim().toLowerCase() === nameNorm && r.phone === phoneNorm) ||
-                (r.fullName.trim().toLowerCase() === nameNorm && r.phone && normalizePhone(r.phone) === phoneNorm)
+                !r.archivedAt &&
+                ((r.fullName.trim().toLowerCase() === nameNorm && r.phone === phoneNorm) ||
+                (r.fullName.trim().toLowerCase() === nameNorm && r.phone && normalizePhone(r.phone) === phoneNorm))
             );
         }
 
@@ -1958,15 +1990,37 @@
         }
 
         // ========== REGISTRANTS TABLE (ADMIN) ==========
+        const PAGE_SIZE = 20;
+        let tablePage = 1;
+        let tableArchiveView = false;
+
+        function switchTableView(view) {
+            tableArchiveView = (view === 'archive');
+            tablePage = 1;
+            const ba = document.getElementById('btnViewActive');
+            const bb = document.getElementById('btnViewArchive');
+            if (ba) { ba.classList.toggle('bg-white', !tableArchiveView); ba.classList.toggle('shadow', !tableArchiveView); ba.classList.toggle('text-primary', !tableArchiveView); ba.classList.toggle('text-gray-500', tableArchiveView); }
+            if (bb) { bb.classList.toggle('bg-white', tableArchiveView); bb.classList.toggle('shadow', tableArchiveView); bb.classList.toggle('text-primary', tableArchiveView); bb.classList.toggle('text-gray-500', !tableArchiveView); }
+            updateRegistrantsTable();
+        }
+
+        function changePage(delta) {
+            tablePage = Math.max(1, tablePage + delta);
+            updateRegistrantsTable();
+        }
+
         function updateRegistrantsTable() {
             const tableBody = document.getElementById('registrantTableBody');
             const noDataMsg = document.getElementById('noDataMsg');
             const badge = document.getElementById('totalRegistrantsBadge');
+            const paginationEl = document.getElementById('tablePagination');
             if (!tableBody) return;
 
             const searchTerm = (document.getElementById('registrantSearch')?.value || '').toLowerCase();
 
-            let filtered = [...registrants].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            let filtered = [...registrants]
+                .filter(r => tableArchiveView ? !!r.archivedAt : !r.archivedAt)
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             if (searchTerm) {
                 filtered = filtered.filter(r =>
                     (r.fullName || '').toLowerCase().includes(searchTerm) ||
@@ -1976,22 +2030,29 @@
                 );
             }
 
-            if (badge) badge.innerText = `Total: ${registrants.length}${searchTerm ? ` (filter: ${filtered.length})` : ''}`;
+            const totalFiltered = filtered.length;
+            const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
+            if (tablePage > totalPages) tablePage = totalPages;
+            const start = (tablePage - 1) * PAGE_SIZE;
+            const pageRows = filtered.slice(start, start + PAGE_SIZE);
+
+            if (badge) badge.innerText = `${tableArchiveView ? 'Arsip' : 'Total'}: ${totalFiltered}${searchTerm ? ` (filter: ${filtered.length})` : ''}${totalFiltered > PAGE_SIZE ? ` • Hal ${tablePage}/${totalPages}` : ''}`;
 
             tableBody.innerHTML = '';
-            if (filtered.length === 0) {
+            if (pageRows.length === 0) {
                 if (noDataMsg) {
-                    noDataMsg.textContent = searchTerm ? 'Tidak ada data yang cocok dengan pencarian.' : 'Belum ada data pendaftar.';
+                    noDataMsg.textContent = searchTerm ? 'Tidak ada data yang cocok dengan pencarian.' : (tableArchiveView ? 'Tidak ada data diarsipkan.' : 'Belum ada data pendaftar.');
                     noDataMsg.classList.remove('hidden');
                 }
                 tableBody.parentElement.classList.add('hidden');
+                if (paginationEl) paginationEl.classList.add('hidden');
                 return;
             }
 
             if (noDataMsg) noDataMsg.classList.add('hidden');
             tableBody.parentElement.classList.remove('hidden');
 
-            filtered.forEach(person => {
+            pageRows.forEach(person => {
                 const dateObj = new Date(person.timestamp);
                 const dateStr = `${dateObj.getDate()}/${dateObj.getMonth()+1}/${dateObj.getFullYear()}`;
                 const statusBadge = person.status === 'Diverifikasi'
@@ -2000,6 +2061,21 @@
                 const dbBadge = person.fromDb
                     ? ' <span class="text-[10px] bg-sky-100 text-sky-600 px-1.5 py-0.5 rounded-full font-semibold ml-1" title="Dari database online"><i class="fa-solid fa-cloud"></i> Online</span>'
                     : '';
+                const archivedBadge = person.archivedAt
+                    ? ' <span class="text-[10px] bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded-full font-semibold ml-1"><i class="fa-solid fa-box-archive"></i> Arsip</span>'
+                    : '';
+                const actions = tableArchiveView
+                    ? `<button onclick="restoreRegistrant('${person.id}')" class="text-blue-600 hover:text-blue-900 bg-blue-50 p-2 rounded-md mr-1" title="Pulihkan"><i class="fa-solid fa-rotate-left"></i></button>
+                       <button onclick="viewRegistrant('${person.id}')" class="text-blue-600 hover:text-blue-900 bg-blue-50 p-2 rounded-md mr-1" title="Detail"><i class="fa-solid fa-eye"></i></button>
+                       <button onclick="waRegistrant('${person.id}')" class="text-green-600 hover:text-green-900 bg-green-50 p-2 rounded-md mr-1" title="Chat WA"><i class="fa-brands fa-whatsapp"></i></button>
+                       <button onclick="hardDeleteRegistrant('${person.id}')" class="text-red-600 hover:text-red-900 bg-red-50 p-2 rounded-md" title="Hapus Permanen"><i class="fa-solid fa-trash"></i></button>`
+                    : `<button onclick="toggleVerify('${person.id}')" class="text-green-600 hover:text-green-900 bg-green-50 p-2 rounded-md mr-1" title="${person.status === 'Diverifikasi' ? 'Batalkan Verifikasi' : 'Tandai Diverifikasi'}">
+                           <i class="fa-solid ${person.status === 'Diverifikasi' ? 'fa-rotate-left' : 'fa-check'}"></i>
+                       </button>
+                       <button onclick="viewRegistrant('${person.id}')" class="text-blue-600 hover:text-blue-900 bg-blue-50 p-2 rounded-md mr-1" title="Detail"><i class="fa-solid fa-eye"></i></button>
+                       <button onclick="waRegistrant('${person.id}')" class="text-green-600 hover:text-green-900 bg-green-50 p-2 rounded-md mr-1" title="Chat WA"><i class="fa-brands fa-whatsapp"></i></button>
+                       <button onclick="editRegistrant('${person.id}')" class="text-amber-600 hover:text-amber-800 bg-amber-50 p-2 rounded-md mr-1" title="Edit"><i class="fa-solid fa-pen"></i></button>
+                       <button onclick="archiveRegistrant('${person.id}')" class="text-red-600 hover:text-red-900 bg-red-50 p-2 rounded-md" title="Arsipkan"><i class="fa-solid fa-box-archive"></i></button>`;
 
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-gray-50';
@@ -2010,7 +2086,7 @@
                                 ${escapeHtml((person.fullName || '?').charAt(0).toUpperCase())}
                             </div>
                             <div class="ml-4">
-                                <div class="text-sm font-medium text-gray-900">${escapeHtml(person.fullName)}${dbBadge}</div>
+                                <div class="text-sm font-medium text-gray-900">${escapeHtml(person.fullName)}${dbBadge}${archivedBadge}</div>
                                 <div class="text-xs text-gray-500">${dateStr}</div>
                             </div>
                         </div>
@@ -2023,17 +2099,18 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${escapeHtml(person.registrationType)}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${statusBadge}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button onclick="toggleVerify('${person.id}')" class="text-green-600 hover:text-green-900 bg-green-50 p-2 rounded-md mr-1" title="${person.status === 'Diverifikasi' ? 'Batalkan Verifikasi' : 'Tandai Diverifikasi'}">
-                            <i class="fa-solid ${person.status === 'Diverifikasi' ? 'fa-rotate-left' : 'fa-check'}"></i>
-                        </button>
-                        <button onclick="viewRegistrant('${person.id}')" class="text-blue-600 hover:text-blue-900 bg-blue-50 p-2 rounded-md mr-1" title="Detail"><i class="fa-solid fa-eye"></i></button>
-                        <button onclick="waRegistrant('${person.id}')" class="text-green-600 hover:text-green-900 bg-green-50 p-2 rounded-md mr-1" title="Chat WA"><i class="fa-brands fa-whatsapp"></i></button>
-                        <button onclick="deleteRegistrant('${person.id}')" class="text-red-600 hover:text-red-900 bg-red-50 p-2 rounded-md" title="Hapus"><i class="fa-solid fa-trash"></i></button>
-                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">${actions}</td>
                 `;
                 tableBody.appendChild(row);
             });
+
+            if (paginationEl) {
+                paginationEl.classList.remove('hidden');
+                paginationEl.innerHTML = `
+                    <button onclick="changePage(-1)" ${tablePage <= 1 ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg text-sm font-medium border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">‹ Sebelumnya</button>
+                    <span class="text-xs text-gray-600">Hal ${tablePage} dari ${totalPages} • ${totalFiltered} data</span>
+                    <button onclick="changePage(1)" ${tablePage >= totalPages ? 'disabled' : ''} class="px-3 py-1.5 rounded-lg text-sm font-medium border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">Berikutnya ›</button>`;
+            }
         }
 
         function toggleVerify(id) {
@@ -2096,15 +2173,131 @@
             window.open(`https://wa.me/${p.phone.replace(/^0/, '62')}?text=${encodeURIComponent(`Halo ${p.fullName}, kami dari Panitia Pembentukan Sinode GKMR...`)}`, '_blank');
         }
 
-        function deleteRegistrant(id) {
+        async function dbUpdateRegistrant(id, payload) {
+            if (!sbClient) return { ok: false, error: 'Supabase tidak tersedia' };
+            const { error } = await sbClient.from(SUPABASE_TABLE).update(payload).eq('id', id);
+            if (error) return { ok: false, error: error.message };
+            return { ok: true };
+        }
+
+        // ========== EDIT DATA ==========
+        function editRegistrant(id) {
+            const p = registrants.find(r => r.id === id);
+            if (!p) return;
             Swal.fire({
-                title: 'Hapus Data?',
-                text: 'Data pendaftar akan dihapus permanen.',
-                icon: 'warning',
+                title: '✏️ Edit Data Pendaftar',
+                html: `
+                    <div class="text-left space-y-3">
+                        <div><label class="block text-xs font-medium text-gray-600 mb-1 text-left">Nama Lengkap *</label><input id="edName" class="swal2-input" value="${escapeHtml(p.fullName)}"></div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div><label class="block text-xs font-medium text-gray-600 mb-1 text-left">Tempat Lahir</label><input id="edBirthPlace" class="swal2-input" value="${escapeHtml(p.birthPlace || '')}"></div>
+                            <div><label class="block text-xs font-medium text-gray-600 mb-1 text-left">Tgl Lahir *</label><input id="edBirthDate" type="date" class="swal2-input" value="${escapeHtml(p.birthDate || '')}" max="2018-12-31"></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div><label class="block text-xs font-medium text-gray-600 mb-1 text-left">Jenis Kelamin</label><select id="edGender" class="swal2-input"><option value="">Pilih...</option><option>Laki-laki</option><option>Perempuan</option></select></div>
+                            <div><label class="block text-xs font-medium text-gray-600 mb-1 text-left">No. HP/WA *</label><input id="edPhone" class="swal2-input" value="${escapeHtml(p.phone)}"></div>
+                        </div>
+                        <div><label class="block text-xs font-medium text-gray-600 mb-1 text-left">Alamat *</label><textarea id="edAddress" class="swal2-input" rows="2">${escapeHtml(p.address)}</textarea></div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div><label class="block text-xs font-medium text-gray-600 mb-1 text-left">Kabupaten</label><select id="edDistrict" class="swal2-input"><option>Morowali Utara</option><option>Morowali</option><option>Lainnya</option></select></div>
+                            <div><label class="block text-xs font-medium text-gray-600 mb-1 text-left">Asal Gereja</label><input id="edOrigin" class="swal2-input" value="${escapeHtml(p.originChurch || '')}"></div>
+                        </div>
+                        <div><label class="block text-xs font-medium text-gray-600 mb-1 text-left">Mendaftar Sebagai</label><select id="edType" class="swal2-input"><option>Individu</option><option>Keluarga</option></select></div>
+                    </div>`,
+                width: 580,
+                showCancelButton: true,
+                confirmButtonText: '💾 Simpan',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#1d4ed8',
+                didOpen: () => {
+                    document.getElementById('edGender').value = p.gender || '';
+                    document.getElementById('edDistrict').value = p.district || 'Morowali Utara';
+                    document.getElementById('edType').value = p.registrationType || 'Individu';
+                },
+                preConfirm: () => {
+                    const name = document.getElementById('edName').value.trim();
+                    const phone = document.getElementById('edPhone').value.trim();
+                    const birthDate = document.getElementById('edBirthDate').value;
+                    const address = document.getElementById('edAddress').value.trim();
+                    if (name.length < 3) { Swal.showValidationMessage('Nama minimal 3 karakter'); return false; }
+                    if (!isValidPhone(phone)) { Swal.showValidationMessage('Nomor HP tidak valid (08xx 8–12 digit)'); return false; }
+                    if (!birthDate) { Swal.showValidationMessage('Tanggal lahir wajib diisi'); return false; }
+                    if (new Date(birthDate).getFullYear() > 2018) { Swal.showValidationMessage('Tahun lahir maksimal 2018'); return false; }
+                    if (address.length < 10) { Swal.showValidationMessage('Alamat minimal 10 karakter'); return false; }
+                    return true;
+                }
+            }).then(async (result) => {
+                if (!result.isConfirmed) return;
+                p.fullName = document.getElementById('edName').value.trim();
+                p.birthPlace = document.getElementById('edBirthPlace').value.trim() || '-';
+                p.birthDate = document.getElementById('edBirthDate').value;
+                p.gender = document.getElementById('edGender').value;
+                p.phone = normalizePhone(document.getElementById('edPhone').value.trim());
+                p.address = document.getElementById('edAddress').value.trim();
+                p.district = document.getElementById('edDistrict').value;
+                p.originChurch = document.getElementById('edOrigin').value.trim() || '-';
+                p.registrationType = document.getElementById('edType').value;
+                saveJSON(STORAGE_KEYS.registrants, registrants);
+                updateRegistrantsTable();
+                if (p.fromDb && p.dbId !== undefined) {
+                    await dbUpdateRegistrant(p.dbId, {
+                        full_name: p.fullName, birth_place: p.birthPlace, birth_date: p.birthDate,
+                        gender: p.gender, phone: p.phone, address: p.address, district: p.district,
+                        origin_church: p.originChurch, registration_type: p.registrationType
+                    });
+                }
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Data diperbarui', showConfirmButton: false, timer: 1500 });
+            });
+        }
+
+        // ========== ARSIP / SOFT DELETE ==========
+        function archiveRegistrant(id) {
+            const person = registrants.find(r => r.id === id);
+            if (!person) return;
+            Swal.fire({
+                title: 'Arsipkan Data?',
+                text: 'Data dipindah ke arsip (tidak tampil di daftar aktif) dan bisa dipulihkan kapan saja.',
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#1d4ed8',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Arsipkan',
+                cancelButtonText: 'Batal'
+            }).then(async (result) => {
+                if (!result.isConfirmed) return;
+                person.archivedAt = new Date().toISOString();
+                saveJSON(STORAGE_KEYS.registrants, registrants);
+                updateRegistrantsTable();
+                updateStats();
+                if (person.fromDb && person.dbId !== undefined) {
+                    await dbUpdateRegistrant(person.dbId, { archived_at: person.archivedAt });
+                }
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Data diarsipkan', showConfirmButton: false, timer: 1500 });
+            });
+        }
+
+        function restoreRegistrant(id) {
+            const person = registrants.find(r => r.id === id);
+            if (!person) return;
+            person.archivedAt = null;
+            saveJSON(STORAGE_KEYS.registrants, registrants);
+            updateRegistrantsTable();
+            updateStats();
+            if (person.fromDb && person.dbId !== undefined) {
+                dbUpdateRegistrant(person.dbId, { archived_at: null });
+            }
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Data dipulihkan', showConfirmButton: false, timer: 1500 });
+        }
+
+        function hardDeleteRegistrant(id) {
+            Swal.fire({
+                title: 'Hapus Permanen?',
+                text: 'Data akan dihapus dari database SELAMANYA dan tidak bisa dikembalikan.',
+                icon: 'error',
                 showCancelButton: true,
                 confirmButtonColor: '#ef4444',
                 cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Ya, Hapus',
+                confirmButtonText: 'Ya, Hapus Permanen',
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
@@ -2114,12 +2307,109 @@
                     updateRegistrantsTable();
                     updateStats();
                     document.getElementById('liveRegistrantCount').textContent = registrants.length;
-                    // Hapus dari database online jika data berasal dari Supabase
                     if (person && person.fromDb && person.dbId !== undefined) {
                         dbDeleteRegistrant(person.dbId);
                     }
-                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Data dihapus', showConfirmButton: false, timer: 1500 });
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Data dihapus permanen', showConfirmButton: false, timer: 1500 });
                 }
+            });
+        }
+
+        // Alias kompatibilitas: hapus = arsipkan
+        function deleteRegistrant(id) { archiveRegistrant(id); }
+
+        // ========== EXPORT EXCEL (.xlsx) — SheetJS lokal, dimuat saat dibutuhkan ==========
+        function loadXLSX(cb) {
+            if (typeof XLSX !== 'undefined') { cb(); return; }
+            const s = document.createElement('script');
+            s.src = 'assets/xlsx.full.min.js';
+            s.onload = cb;
+            s.onerror = () => { Swal.close(); Swal.fire({ icon: 'error', title: 'Gagal Memuat Library', text: 'Periksa koneksi lalu muat ulang halaman.' }); };
+            document.head.appendChild(s);
+        }
+
+        function exportExcel() {
+            Swal.fire({ title: 'Menyiapkan Excel...', text: 'Memuat komponen spreadsheet...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            loadXLSX(() => {
+                const rows = registrants.map(r => ({
+                    'Nama Lengkap': r.fullName,
+                    'Tempat Lahir': r.birthPlace || '-',
+                    'Tanggal Lahir': r.birthDate || '',
+                    'Jenis Kelamin': r.gender || '',
+                    'No HP': r.phone,
+                    'Alamat': r.address || '',
+                    'Kabupaten': r.district || '',
+                    'Asal Gereja': r.originChurch || '-',
+                    'Tipe': r.registrationType || 'Individu',
+                    'Status': r.status || 'Baru',
+                    'Tanggal Daftar': r.timestamp || '',
+                    'Sumber': r.fromDb ? 'Database Online' : 'Lokal'
+                }));
+                if (!rows.length) {
+                    Swal.close();
+                    Swal.fire({ icon: 'info', title: 'Belum Ada Data', text: 'Tidak ada pendaftar untuk diekspor.' });
+                    return;
+                }
+                const ws = XLSX.utils.json_to_sheet(rows);
+                ws['!cols'] = [{ wch: 24 }, { wch: 14 }, { wch: 13 }, { wch: 12 }, { wch: 15 }, { wch: 40 }, { wch: 14 }, { wch: 26 }, { wch: 10 }, { wch: 12 }, { wch: 22 }, { wch: 15 }];
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, 'Pendaftar');
+                XLSX.writeFile(wb, `pendaftar-gkmr-${new Date().toISOString().slice(0, 10)}.xlsx`);
+                Swal.close();
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: `Excel diunduh (${rows.length} data)`, showConfirmButton: false, timer: 1800 });
+            });
+        }
+
+        // ========== KELOLA ADMIN ==========
+        async function loadAdmins() {
+            const el = document.getElementById('adminList');
+            if (!el || !sbClient) return;
+            try {
+                const { data, error } = await sbClient.from('admins').select('email,name,created_at').order('email');
+                if (error) { el.innerHTML = `<div class="text-xs text-red-500">Gagal memuat admin: ${escapeHtml(error.message)}</div>`; return; }
+                const session = await sbClient.auth.getSession();
+                const me = (session.data && session.data.session && session.data.session.user && session.data.session.user.email) || '';
+                el.innerHTML = (data || []).map(a => `
+                    <div class="flex items-center justify-between bg-white rounded-lg border border-gray-200 px-3 py-2">
+                        <div>
+                            <div class="text-sm font-medium text-gray-800">${escapeHtml(a.name || a.email)}${a.email === me ? ' <span class="text-[10px] bg-blue-100 text-primary px-1.5 py-0.5 rounded-full font-semibold">Anda</span>' : ''}</div>
+                            <div class="text-xs text-gray-500">${escapeHtml(a.email)}</div>
+                        </div>
+                        ${a.email !== me ? `<button onclick="removeAdmin('${escapeHtml(a.email)}')" class="text-red-600 hover:text-red-900 bg-red-50 p-2 rounded-md" title="Hapus admin"><i class="fa-solid fa-user-minus"></i></button>` : ''}
+                    </div>`).join('') || '<div class="text-xs text-gray-400">Belum ada admin.</div>';
+            } catch (e) {
+                el.innerHTML = '<div class="text-xs text-red-500">Gagal memuat admin.</div>';
+            }
+        }
+
+        async function addAdmin(event) {
+            event.preventDefault();
+            const email = document.getElementById('newAdminEmail').value.trim().toLowerCase();
+            const name = document.getElementById('newAdminName').value.trim();
+            if (!email || !sbClient) return;
+            const { error } = await sbClient.from('admins').insert({ email, name: name || null });
+            if (error) { Swal.fire({ icon: 'error', title: 'Gagal Menambah', text: error.message }); return; }
+            document.getElementById('addAdminForm').reset();
+            loadAdmins();
+            Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Admin ditambahkan', showConfirmButton: false, timer: 1500 });
+        }
+
+        function removeAdmin(email) {
+            Swal.fire({
+                title: 'Hapus Admin?',
+                text: `${email} tidak bisa lagi mengakses panel admin.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Hapus',
+                cancelButtonText: 'Batal'
+            }).then(async (result) => {
+                if (!result.isConfirmed || !sbClient) return;
+                const { error } = await sbClient.from('admins').delete().eq('email', email);
+                if (error) { Swal.fire({ icon: 'error', title: 'Gagal', text: error.message }); return; }
+                loadAdmins();
+                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Admin dihapus', showConfirmButton: false, timer: 1500 });
             });
         }
 
